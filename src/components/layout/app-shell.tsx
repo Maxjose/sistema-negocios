@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Boxes,
   ChartNoAxesCombined,
@@ -41,17 +44,26 @@ const adminLinks = [
 
 export function AppShell({ children, role, title, userName }: AppShellProps) {
   const links = role === "admin" ? adminLinks : ownerLinks;
+  const pathname = usePathname();
+  const activeHref = links
+    .filter(({ href }) =>
+      href === "/admin"
+        ? pathname === href
+        : pathname === href || pathname.startsWith(`${href}/`),
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
       <aside className="hidden border-r bg-surface px-4 py-6 lg:flex lg:flex-col">
         <BrandMark className="px-2" />
         <nav aria-label="Navegación principal" className="mt-9 space-y-1">
-          {links.map(({ label, href, icon: Icon }, index) => (
+          {links.map(({ label, href, icon: Icon }) => (
             <Link
+              aria-current={href === activeHref ? "page" : undefined}
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition hover:bg-accent hover:text-brand-strong",
-                index === 0 && "bg-accent text-brand-strong",
+                href === activeHref && "bg-accent text-brand-strong",
               )}
               href={href}
               key={href}
@@ -93,7 +105,11 @@ export function AppShell({ children, role, title, userName }: AppShellProps) {
       >
         {links.slice(0, 5).map(({ label, href, icon: Icon }) => (
           <Link
-            className="flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand"
+            aria-current={href === activeHref ? "page" : undefined}
+            className={cn(
+              "flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand",
+              href === activeHref && "bg-accent text-brand-strong",
+            )}
             href={href}
             key={href}
           >
