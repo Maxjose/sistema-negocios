@@ -5,8 +5,9 @@ y ganancias de pequeños negocios.
 
 ## Estado
 
-El proyecto se encuentra en la Fase 1: base técnica y diseño. El alcance y las
-fases completas están documentados en `PLAN_TECNICO.md`.
+La base técnica está terminada y el proyecto se encuentra en la Fase 2:
+autenticación, modelo de datos y permisos. El alcance y las fases completas
+están documentados en `PLAN_TECNICO.md`.
 
 ## Requisitos
 
@@ -40,5 +41,15 @@ También puede ejecutarse todo con `npm run check`.
 - `/dashboard`: superficie inicial del propietario.
 - `/admin`: superficie inicial del administrador principal.
 
-La protección real de rutas y la conexión con Supabase se implementarán en la
-Fase 2.
+Las rutas están protegidas mediante sesiones Supabase SSR y autorización por
+rol. El esquema, las políticas RLS y las instrucciones de migración están en
+`supabase/`.
+
+## Primer administrador
+
+El comando `npm run admin:create` crea o sincroniza el primer
+`super_admin` usando las variables temporales `INITIAL_ADMIN_EMAIL`,
+`INITIAL_ADMIN_NAME` e `INITIAL_ADMIN_PASSWORD`.
+
+La contraseña temporal debe eliminarse de `.env` inmediatamente después de
+crear y comprobar la cuenta.

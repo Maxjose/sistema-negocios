@@ -13,12 +13,14 @@ import {
 } from "lucide-react";
 
 import { BrandMark } from "@/components/brand/brand-mark";
+import { logout } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
 
 type AppShellProps = {
   children: React.ReactNode;
   role: "owner" | "admin";
   title: string;
+  userName: string;
 };
 
 const ownerLinks = [
@@ -38,7 +40,7 @@ const adminLinks = [
   { label: "Configuración", href: "/admin/settings", icon: Settings },
 ];
 
-export function AppShell({ children, role, title }: AppShellProps) {
+export function AppShell({ children, role, title, userName }: AppShellProps) {
   const links = role === "admin" ? adminLinks : ownerLinks;
 
   return (
@@ -60,13 +62,15 @@ export function AppShell({ children, role, title }: AppShellProps) {
             </Link>
           ))}
         </nav>
-        <button
-          className="mt-auto flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-red-50 hover:text-red-700"
-          type="button"
-        >
-          <LogOut aria-hidden="true" className="size-[1.125rem]" />
-          Cerrar sesión
-        </button>
+        <form action={logout} className="mt-auto">
+          <button
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-red-50 hover:text-red-700"
+            type="submit"
+          >
+            <LogOut aria-hidden="true" className="size-[1.125rem]" />
+            Cerrar sesión
+          </button>
+        </form>
       </aside>
 
       <div className="min-w-0">
@@ -81,9 +85,12 @@ export function AppShell({ children, role, title }: AppShellProps) {
             </button>
             <h1 className="text-lg font-bold tracking-tight">{title}</h1>
           </div>
-          <span className="rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-brand-strong">
-            {role === "admin" ? "Administrador" : "Mi negocio"}
-          </span>
+          <div className="text-right">
+            <p className="text-sm font-semibold">{userName}</p>
+            <p className="text-xs text-muted">
+              {role === "admin" ? "Administrador" : "Propietario"}
+            </p>
+          </div>
         </header>
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>

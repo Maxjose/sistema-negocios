@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
-import { LockKeyhole, Mail, ShieldCheck, TrendingUp } from "lucide-react";
+import { redirect } from "next/navigation";
+import { ShieldCheck, TrendingUp } from "lucide-react";
 
 import { BrandMark } from "@/components/brand/brand-mark";
-import { Button } from "@/components/ui/button";
+import { LoginForm } from "@/features/auth/login-form";
+import { getCurrentProfile } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Iniciar sesión",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const profile = await getCurrentProfile();
+
+  if (profile) {
+    redirect(profile.role === "super_admin" ? "/admin" : "/dashboard");
+  }
+
   return (
     <main className="grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
       <section className="relative hidden overflow-hidden bg-brand-strong p-12 text-white lg:flex lg:flex-col">
@@ -47,45 +55,7 @@ export default function LoginPage() {
             Usa las credenciales proporcionadas por el administrador.
           </p>
 
-          <form className="mt-8 space-y-5">
-            <label className="block">
-              <span className="text-sm font-semibold">Correo electrónico</span>
-              <span className="relative mt-2 block">
-                <Mail
-                  aria-hidden="true"
-                  className="absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-muted"
-                />
-                <input
-                  autoComplete="email"
-                  className="h-12 w-full rounded-xl border bg-surface pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-3 focus:ring-accent"
-                  name="email"
-                  placeholder="nombre@negocio.com"
-                  type="email"
-                />
-              </span>
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-semibold">Contraseña</span>
-              <span className="relative mt-2 block">
-                <LockKeyhole
-                  aria-hidden="true"
-                  className="absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-muted"
-                />
-                <input
-                  autoComplete="current-password"
-                  className="h-12 w-full rounded-xl border bg-surface pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-3 focus:ring-accent"
-                  name="password"
-                  placeholder="Tu contraseña"
-                  type="password"
-                />
-              </span>
-            </label>
-
-            <Button className="h-12 w-full" type="submit">
-              Entrar al sistema
-            </Button>
-          </form>
+          <LoginForm />
 
           <p className="mt-7 text-center text-xs leading-5 text-muted">
             No existe registro público. Si necesitas acceso, contacta al
