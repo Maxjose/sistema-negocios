@@ -6,7 +6,8 @@
 - Fase 1: completada.
 - Fase 2: completada.
 - Fase 3: completada.
-- Fase 4: siguiente — catálogo e inventario simple.
+- Fase 4: completada.
+- Fase 5: siguiente — ventas transaccionales.
 
 ## 1. Objetivo del MVP
 

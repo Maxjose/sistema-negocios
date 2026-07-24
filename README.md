@@ -5,9 +5,9 @@ y ganancias de pequeños negocios.
 
 ## Estado
 
-Las fases de base técnica, autenticación, modelo de datos y administración
-están terminadas. El alcance y las fases completas están documentados en
-`PLAN_TECNICO.md`.
+Las fases de base técnica, autenticación, administración, catálogo e inventario
+simple están terminadas. El alcance y las fases completas están documentados
+en `PLAN_TECNICO.md`.
 
 ## Requisitos
 
@@ -35,6 +35,9 @@ npm run build
 
 También puede ejecutarse todo con `npm run check`.
 
+La prueba `npm run test:rls` verifica contra Supabase que dos negocios no puedan
+leer ni modificar datos entre sí y elimina sus registros temporales al terminar.
+
 ## Rutas iniciales
 
 - `/login`: acceso privado.
@@ -43,6 +46,8 @@ También puede ejecutarse todo con `npm run check`.
 - `/admin/businesses`: gestión de negocios.
 - `/admin/users`: gestión de propietarios.
 - `/admin/activity`: auditoría administrativa.
+- `/products`: catálogo e inventario del propietario.
+- `/settings`: categorías y métodos de pago del propietario.
 
 Las rutas están protegidas mediante sesiones Supabase SSR y autorización por
 rol. El esquema, las políticas RLS y las instrucciones de migración están en
