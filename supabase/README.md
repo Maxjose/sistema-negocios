@@ -4,9 +4,9 @@ Las migraciones de este directorio son la fuente de verdad del esquema.
 
 ## Aplicación inicial
 
-Hasta disponer de Supabase CLI enlazado, abre el editor SQL del proyecto,
-pega el contenido completo de `migrations/20260724203000_initial_schema.sql` y
-ejecútalo una sola vez.
+Hasta disponer de Supabase CLI enlazado, abre el editor SQL del proyecto y
+ejecuta una sola vez cada archivo de `migrations/`, en orden ascendente por
+nombre.
 
 La migración crea:
 
@@ -16,6 +16,7 @@ La migración crea:
 - políticas de archivos;
 - bucket privado `business-assets`;
 - funciones auxiliares de autorización.
+- bloqueo de acceso cuando el negocio está inactivo.
 
 No ejecutes una migración parcialmente ni modifiques el esquema directamente
 sin crear primero un nuevo archivo de migración.

@@ -26,16 +26,22 @@ export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> 
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, business_id, full_name, role, status, must_change_password",
+      "id, business_id, full_name, role, status, must_change_password, businesses(status)",
     )
     .eq("id", userId)
     .single();
 
-  if (error || !data || data.status !== "active") {
+  const business = Array.isArray(data?.businesses)
+    ? data.businesses[0]
+    : data?.businesses;
+  const businessIsAllowed =
+    data?.role === "super_admin" || business?.status === "active";
+
+  if (error || !data || data.status !== "active" || !businessIsAllowed) {
     return null;
   }
 
-  return data as CurrentProfile;
+  return data as unknown as CurrentProfile;
 });
 
 export async function requireProfile() {

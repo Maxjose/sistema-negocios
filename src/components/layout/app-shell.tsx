@@ -4,7 +4,6 @@ import {
   ChartNoAxesCombined,
   LayoutDashboard,
   LogOut,
-  Menu,
   ReceiptText,
   Settings,
   ShoppingCart,
@@ -76,13 +75,7 @@ export function AppShell({ children, role, title, userName }: AppShellProps) {
       <div className="min-w-0">
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-surface/95 px-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <button
-              aria-label="Abrir menú"
-              className="grid size-10 place-items-center rounded-xl border lg:hidden"
-              type="button"
-            >
-              <Menu aria-hidden="true" className="size-5" />
-            </button>
+            <BrandMark compact className="lg:hidden" />
             <h1 className="text-lg font-bold tracking-tight">{title}</h1>
           </div>
           <div className="text-right">
@@ -92,8 +85,23 @@ export function AppShell({ children, role, title, userName }: AppShellProps) {
             </p>
           </div>
         </header>
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="p-4 pb-24 sm:p-6 sm:pb-24 lg:p-8">{children}</main>
       </div>
+      <nav
+        aria-label="Navegación móvil"
+        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t bg-surface px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
+      >
+        {links.slice(0, 5).map(({ label, href, icon: Icon }) => (
+          <Link
+            className="flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand"
+            href={href}
+            key={href}
+          >
+            <Icon aria-hidden="true" className="size-5" />
+            <span className="max-w-16 truncate">{label}</span>
+          </Link>
+        ))}
+      </nav>
     </div>
   );
 }

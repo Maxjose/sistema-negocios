@@ -37,11 +37,22 @@ export async function login(
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("role, status")
+    .select("role, status, businesses(status)")
     .eq("id", authData.user.id)
     .single();
 
-  if (profileError || !profile || profile.status !== "active") {
+  const business = Array.isArray(profile?.businesses)
+    ? profile.businesses[0]
+    : profile?.businesses;
+  const businessIsAllowed =
+    profile?.role === "super_admin" || business?.status === "active";
+
+  if (
+    profileError ||
+    !profile ||
+    profile.status !== "active" ||
+    !businessIsAllowed
+  ) {
     await supabase.auth.signOut();
     return { error: "Esta cuenta no está activa. Contacta al administrador." };
   }

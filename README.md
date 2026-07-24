@@ -5,9 +5,9 @@ y ganancias de pequeños negocios.
 
 ## Estado
 
-La base técnica está terminada y el proyecto se encuentra en la Fase 2:
-autenticación, modelo de datos y permisos. El alcance y las fases completas
-están documentados en `PLAN_TECNICO.md`.
+Las fases de base técnica, autenticación, modelo de datos y administración
+están terminadas. El alcance y las fases completas están documentados en
+`PLAN_TECNICO.md`.
 
 ## Requisitos
 
@@ -40,6 +40,9 @@ También puede ejecutarse todo con `npm run check`.
 - `/login`: acceso privado.
 - `/dashboard`: superficie inicial del propietario.
 - `/admin`: superficie inicial del administrador principal.
+- `/admin/businesses`: gestión de negocios.
+- `/admin/users`: gestión de propietarios.
+- `/admin/activity`: auditoría administrativa.
 
 Las rutas están protegidas mediante sesiones Supabase SSR y autorización por
 rol. El esquema, las políticas RLS y las instrucciones de migración están en

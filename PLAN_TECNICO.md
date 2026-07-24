@@ -1,5 +1,13 @@
 # Plan técnico — Sistema de gestión de negocios
 
+## Estado de implementación
+
+- Fase 0: completada.
+- Fase 1: completada.
+- Fase 2: completada.
+- Fase 3: completada.
+- Fase 4: siguiente — catálogo e inventario simple.
+
 ## 1. Objetivo del MVP
 
 Construir una aplicación web multiempresa para que cada propietario pueda:
