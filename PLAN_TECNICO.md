@@ -449,19 +449,21 @@ Cada fase debe terminar en una versión demostrable:
 
 No se construirá el dashboard final antes de estabilizar las ventas, porque sus cifras dependen de ese modelo.
 
-## 13. Decisiones que deben confirmarse antes de la Fase 1
+## 13. Decisiones confirmadas para el MVP
 
-- Si habrá un solo propietario por negocio o varios usuarios propietarios.
-- Si se permitirán descuentos por línea, globales o ambos.
-- Si una venta puede repartirse entre varios métodos de pago; para el MVP se recomienda uno solo.
-- Si el precio aplicado puede modificarse al vender y qué rol puede hacerlo.
-- Moneda inicial y si se requiere más de una moneda por negocio; se recomienda una.
-- Si el stock puede quedar negativo; se recomienda prohibirlo.
-- Si productos con precio de costo cero estarán permitidos.
-- Tamaño y formatos máximos para fotografías.
-- Si el administrador puede ver datos financieros de todos los negocios.
-- Si la recuperación de contraseña será autoservicio o exclusivamente administrativa.
-- Formato del número de venta y si debe reiniciarse por negocio/año.
+- Se permitirán varios propietarios por negocio.
+- El descuento será global por venta.
+- Cada venta utilizará un único método de pago.
+- El precio no podrá modificarse durante la venta.
+- Cada negocio utilizará una sola moneda.
+- El stock negativo estará prohibido.
+- Se permitirán productos con precio de costo cero.
+- Las fotografías aceptarán JPG, PNG y WebP, con un máximo de 5 MB.
+- El administrador principal podrá consultar los datos financieros.
+- La recuperación de acceso será gestionada por el administrador.
+- El número de venta será una secuencia por negocio con formato `V-000001`.
+- Los productos agotados no podrán venderse.
+- Una venta confirmada no se editará: deberá anularse y crearse nuevamente.
 
 ## 14. Definición de terminado del MVP
 
