@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { voidSale } from "@/features/sales/actions";
 import { getSale } from "@/features/sales/data";
+import { PrintReceiptButton } from "@/features/sales/print-receipt-button";
 import { formatMoney } from "@/lib/money";
 
 export default async function SaleDetailPage({
@@ -21,16 +22,14 @@ export default async function SaleDetailPage({
       <Link className="inline-flex items-center gap-2 text-sm font-semibold text-brand" href="/sales">
         <ArrowLeft className="size-4" /> Volver a ventas
       </Link>
-      <div className="mt-5 flex items-start justify-between">
+      <div className="mt-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-muted">Detalle de venta</p>
           <h2 className="text-2xl font-bold">
             V-{String(sale.sale_number).padStart(6, "0")}
           </h2>
         </div>
-        <span className={sale.status === "completed" ? "rounded-full bg-accent px-3 py-1 text-sm font-semibold text-brand" : "rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-700"}>
-          {sale.status === "completed" ? "Completada" : "Anulada"}
-        </span>
+        <div className="flex items-center gap-3"><PrintReceiptButton /><span className={sale.status === "completed" ? "rounded-full bg-accent px-3 py-1 text-sm font-semibold text-brand" : "rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-700"}>{sale.status === "completed" ? "Completada" : "Anulada"}</span></div>
       </div>
 
       <section className="mt-7 rounded-2xl border bg-surface p-5">
@@ -39,6 +38,14 @@ export default async function SaleDetailPage({
           <div><p className="text-xs text-muted">Total</p><p className="font-semibold">{formatMoney(Number(sale.total))}</p></div>
           <div><p className="text-xs text-muted">Ganancia bruta</p><p className="font-semibold">{formatMoney(Number(sale.gross_profit))}</p></div>
         </div>
+        {sale.sale_payments && sale.sale_payments.length > 0 && (
+          <div className="mt-5 border-t pt-4">
+            <p className="text-xs font-semibold uppercase text-muted">Detalle del pago</p>
+            <div className="mt-2 space-y-1">
+              {sale.sale_payments.map((payment) => <div className="flex justify-between text-sm" key={payment.id}><span>{payment.payment_method_name}</span><strong>{formatMoney(Number(payment.amount))}</strong></div>)}
+            </div>
+          </div>
+        )}
         <div className="mt-6 space-y-3 sm:hidden">
           {sale.sale_items?.map((item) => (
             <article className="rounded-xl bg-background p-4" key={item.id}>

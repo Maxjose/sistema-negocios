@@ -11,6 +11,12 @@
   --accent: #dbf4e7;
 }
 
+@media print {
+  aside, nav, header, .print\:hidden { display: none !important; }
+  body { background: white !important; }
+  main { padding: 0 !important; }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -153,3 +153,20 @@ export async function getAdminStats() {
     activeOwnerCount: activeOwnerCount ?? 0,
   };
 }
+
+export async function getAdminAlerts() {
+  await requireRole("super_admin");
+  const admin = createAdminClient();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const [{ count: inactiveBusinesses }, { count: pendingPasswordChange }, { count: ownersWithoutRecentAccess }] = await Promise.all([
+    admin.from("businesses").select("*", { count: "exact", head: true }).eq("status", "inactive"),
+    admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "owner").eq("must_change_password", true),
+    admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "owner").or(`last_login_at.is.null,last_login_at.lt.${thirtyDaysAgo.toISOString()}`),
+  ]);
+  return {
+    inactiveBusinesses: inactiveBusinesses ?? 0,
+    pendingPasswordChange: pendingPasswordChange ?? 0,
+    ownersWithoutRecentAccess: ownersWithoutRecentAccess ?? 0,
+  };
+}

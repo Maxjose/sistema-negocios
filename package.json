@@ -15,6 +15,7 @@
     "test:security": "node --env-file=.env scripts/verify-access-security.mjs",
     "test:features": "node --env-file=.env scripts/verify-business-features.mjs",
     "test:sessions": "node --env-file=.env scripts/verify-session-revocation.mjs",
+    "test:payments": "node --env-file=.env scripts/verify-mixed-payments.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "test:watch": "vitest",
     "admin:create": "node --env-file=.env scripts/create-super-admin.mjs",

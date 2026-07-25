@@ -9,12 +9,14 @@ function change(current: number, previous: number) {
 
 export function ReportView({ report, previous, detailed = false, useStock = true }: { report: BusinessReport; previous: BusinessReport; detailed?: boolean; useStock?: boolean }) {
   const currency = report.currency;
+  const margin = Number(report.summary.total_sales) > 0 ? Number(report.summary.gross_profit) / Number(report.summary.total_sales) * 100 : 0;
   const cards = [
     { label: "Total vendido", value: formatMoney(Number(report.summary.total_sales), currency), delta: change(Number(report.summary.total_sales), Number(previous.summary.total_sales)), icon: CircleDollarSign },
     { label: "Ganancia bruta", value: formatMoney(Number(report.summary.gross_profit), currency), delta: change(Number(report.summary.gross_profit), Number(previous.summary.gross_profit)), icon: TrendingUp },
     { label: "Ventas", value: String(report.summary.sale_count), delta: change(report.summary.sale_count, previous.summary.sale_count), icon: ReceiptText },
     { label: "Ticket promedio", value: formatMoney(Number(report.summary.average_ticket), currency), delta: change(Number(report.summary.average_ticket), Number(previous.summary.average_ticket)), icon: WalletCards },
     { label: "Unidades vendidas", value: String(report.summary.units_sold), delta: change(report.summary.units_sold, previous.summary.units_sold), icon: ShoppingBasket },
+    { label: "Margen bruto", value: `${margin.toFixed(1)}%`, icon: TrendingUp },
     ...(useStock ? [{ label: "Stock bajo", value: String(report.inventory.low_stock), icon: Boxes }] : []),
   ];
   const maxDaily = Math.max(1, ...report.daily.map((item) => Number(item.sales)));

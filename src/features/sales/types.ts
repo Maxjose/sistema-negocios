@@ -12,6 +12,13 @@ export type Sale = {
   void_reason: string | null;
   voided_at: string | null;
   sale_items?: SaleItem[];
+  sale_payments?: SalePayment[];
+};
+
+export type SalePayment = {
+  id: string;
+  payment_method_name: string;
+  amount: number;
 };
 
 export type SaleItem = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { confirmSale, type SaleState } from "@/features/sales/actions";
 import { formatMoney } from "@/lib/money";
 
 type CartItem = { product: Product; quantity: number };
+type Payment = { payment_method_id: string; amount: number };
 const initialState: SaleState = {};
 
 export function PosForm({
@@ -26,12 +27,18 @@ export function PosForm({
 }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const [discount, setDiscount] = useState(0);
+  const [payments, setPayments] = useState<Payment[]>([
+    { payment_method_id: "", amount: 0 },
+  ]);
   const [state, action, pending] = useActionState(confirmSale, initialState);
   const visible = products.filter(
     (product) =>
       product.is_active &&
       (!features.use_stock || product.stock_quantity > 0) &&
+      (!category || product.categories?.name === category) &&
       (!query ||
         product.name.toLowerCase().includes(query.toLowerCase()) ||
         product.sku?.toLowerCase().includes(query.toLowerCase())),
@@ -45,6 +52,22 @@ export function PosForm({
       ),
     [cart],
   );
+  const total = Math.max(0, subtotal - discount);
+  const paymentTotal = payments.reduce(
+    (sum, payment) => sum + payment.amount,
+    0,
+  );
+  const categories = [...new Set(products.map((product) => product.categories?.name).filter(Boolean))] as string[];
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      if (event.key === "/" && document.activeElement?.tagName !== "INPUT") {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", focusSearch);
+    return () => window.removeEventListener("keydown", focusSearch);
+  }, []);
 
   const setQuantity = (product: Product, quantity: number) => {
     if (quantity <= 0) {
@@ -68,8 +91,14 @@ export function PosForm({
           className="h-12 w-full rounded-xl border bg-surface px-4"
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Buscar producto por nombre o SKU"
+          ref={searchRef}
           value={query}
         />
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          <button className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${!category ? "bg-brand text-white" : "border bg-surface"}`} onClick={() => setCategory("")} type="button">Todos</button>
+          {categories.map((name) => <button className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${category === name ? "bg-brand text-white" : "border bg-surface"}`} key={name} onClick={() => setCategory(name)} type="button">{name}</button>)}
+          <span className="ml-auto hidden shrink-0 self-center text-xs text-muted sm:block">Presiona / para buscar</span>
+        </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((product) => {
             const item = cart.find((entry) => entry.product.id === product.id);
@@ -160,7 +189,12 @@ export function PosForm({
           Método de pago
           <select
             className="mt-2 h-11 w-full rounded-xl border px-3"
-            name="payment_method_id"
+            onChange={(event) =>
+              setPayments((current) => [
+                { ...current[0], payment_method_id: event.target.value },
+                ...current.slice(1),
+              ])
+            }
             required
           >
             <option value="">Selecciona</option>
@@ -173,6 +207,66 @@ export function PosForm({
               ))}
           </select>
         </label>
+        {payments.length > 1 && (
+          <input
+            className="mt-2 h-11 w-full rounded-xl border px-3"
+            min="0.01"
+            onChange={(event) =>
+              setPayments((current) =>
+                current.map((payment, index) =>
+                  index === 0
+                    ? { ...payment, amount: Number(event.target.value) }
+                    : payment,
+                ),
+              )
+            }
+            placeholder="Monto del primer método"
+            step="0.01"
+            type="number"
+            value={payments[0].amount || ""}
+          />
+        )}
+        {payments.slice(1).map((payment, offset) => {
+          const index = offset + 1;
+          return (
+            <div className="mt-2 grid grid-cols-[1fr_7rem_auto] gap-2" key={index}>
+              <select
+                className="h-11 rounded-xl border px-3"
+                onChange={(event) =>
+                  setPayments((current) =>
+                    current.map((entry, position) =>
+                      position === index
+                        ? { ...entry, payment_method_id: event.target.value }
+                        : entry,
+                    ),
+                  )
+                }
+                required
+                value={payment.payment_method_id}
+              >
+                <option value="">Selecciona</option>
+                {methods.filter((method) => method.is_active && !payments.some((entry, position) => position !== index && entry.payment_method_id === method.id)).map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}
+              </select>
+              <input className="h-11 rounded-xl border px-3" min="0.01" onChange={(event) => setPayments((current) => current.map((entry, position) => position === index ? { ...entry, amount: Number(event.target.value) } : entry))} placeholder="Monto" required step="0.01" type="number" value={payment.amount || ""} />
+              <button aria-label="Quitar pago" className="px-2 text-red-600" onClick={() => setPayments((current) => current.filter((_, position) => position !== index))} type="button"><Trash2 className="size-4" /></button>
+            </div>
+          );
+        })}
+        {payments.length < Math.min(5, methods.filter((method) => method.is_active).length) && (
+          <button className="mt-2 text-sm font-semibold text-brand" onClick={() => setPayments((current) => [...current.map((payment, index) => index === 0 && current.length === 1 ? { ...payment, amount: total } : payment), { payment_method_id: "", amount: 0 }])} type="button">
+            + Combinar otro método
+          </button>
+        )}
+        <input
+          name="payments"
+          type="hidden"
+          value={JSON.stringify(
+            payments.map((payment) => ({
+              ...payment,
+              amount: payments.length === 1 ? total : payment.amount,
+            })),
+          )}
+        />
         {features.allow_discounts ? (
           <label className="mt-4 block text-sm font-semibold">
             Descuento
@@ -209,8 +303,16 @@ export function PosForm({
           </div>
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>
-            <span>{formatMoney(Math.max(0, subtotal - discount))}</span>
+            <span>{formatMoney(total)}</span>
           </div>
+          {payments.length > 1 && (
+            <div className="flex justify-between text-xs">
+              <span>Por asignar</span>
+              <span className={Math.abs(total - paymentTotal) < 0.005 ? "text-brand" : "text-red-600"}>
+                {formatMoney(total - paymentTotal)}
+              </span>
+            </div>
+          )}
         </div>
         {state.error && (
           <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
@@ -219,7 +321,15 @@ export function PosForm({
         )}
         <Button
           className="mt-5 h-12 w-full"
-          disabled={pending || cart.length === 0 || discount > subtotal}
+          disabled={
+            pending ||
+            cart.length === 0 ||
+            discount > subtotal ||
+            !payments[0]?.payment_method_id ||
+            payments.some((payment) => !payment.payment_method_id) ||
+            (payments.length > 1 &&
+              Math.abs(total - paymentTotal) >= 0.005)
+          }
           type="submit"
         >
           {pending ? "Confirmando..." : "Confirmar venta"}

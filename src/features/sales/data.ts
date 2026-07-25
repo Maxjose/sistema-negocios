@@ -22,7 +22,7 @@ export async function getSale(id: string): Promise<Sale | null> {
   const supabase = await client();
   const { data, error } = await supabase
     .from("sales")
-    .select("id, sale_number, sold_at, subtotal, total, total_cost, gross_profit, discount, payment_method_name, status, note, void_reason, voided_at, sale_items(id, product_name, product_sku, quantity, unit_cost, unit_price, subtotal, gross_profit)")
+    .select("id, sale_number, sold_at, subtotal, total, total_cost, gross_profit, discount, payment_method_name, status, note, void_reason, voided_at, sale_items(id, product_name, product_sku, quantity, unit_cost, unit_price, subtotal, gross_profit), sale_payments(id, payment_method_name, amount)")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(error.message);

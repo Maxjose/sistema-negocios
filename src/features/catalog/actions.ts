@@ -221,3 +221,51 @@ export async function uploadProductImage(
   revalidatePath(`/products/${id}`);
   return { success: "Imagen actualizada." };
 }
+
+function parseCsvLine(line: string) {
+  const values: string[] = [];
+  let value = "";
+  let quoted = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if (character === '"' && quoted && line[index + 1] === '"') { value += '"'; index += 1; }
+    else if (character === '"') quoted = !quoted;
+    else if (character === "," && !quoted) { values.push(value.trim()); value = ""; }
+    else value += character;
+  }
+  values.push(value.trim());
+  return values;
+}
+
+export async function importProducts(_state: CatalogState, formData: FormData): Promise<CatalogState> {
+  const { profile, businessId, supabase } = await context();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Selecciona un archivo CSV." };
+  if (file.size > 1024 * 1024) return { error: "El archivo supera 1 MB." };
+  const lines = (await file.text()).replace(/^\uFEFF/, "").split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2 || lines.length > 501) return { error: "Incluye entre 1 y 500 productos." };
+  const headers = parseCsvLine(lines[0]).map((header) => header.toLowerCase());
+  const required = ["nombre", "precio_costo", "precio_venta"];
+  if (required.some((header) => !headers.includes(header))) return { error: "Faltan columnas: nombre, precio_costo o precio_venta." };
+  const { data: categories } = await supabase.from("categories").select("id, name");
+  const categoryMap = new Map((categories ?? []).map((category) => [category.name.toLowerCase(), category.id]));
+  const payload = [];
+  for (let index = 1; index < lines.length; index += 1) {
+    const values = parseCsvLine(lines[index]);
+    const row = Object.fromEntries(headers.map((header, position) => [header, values[position] ?? ""]));
+    const parsed = productSchema.safeParse({
+      name: row.nombre, sku: row.sku, description: row.descripcion,
+      category_id: row.categoria ? categoryMap.get(row.categoria.toLowerCase()) ?? "" : "",
+      cost_price: row.precio_costo, sale_price: row.precio_venta,
+      stock_quantity: row.existencia || 0, low_stock_threshold: row.minimo || 0,
+      is_active: "true",
+    });
+    if (!parsed.success) return { error: `La fila ${index + 1} contiene datos inválidos.` };
+    payload.push({ ...parsed.data, business_id: businessId, category_id: parsed.data.category_id || null, sku: parsed.data.sku || null, description: parsed.data.description || null });
+  }
+  const { error } = await supabase.from("products").insert(payload);
+  if (error) return { error: `No se pudo importar: ${error.message}` };
+  await audit({ action: "products.imported", type: "product", id: "bulk", businessId, actorId: profile.id, after: { count: payload.length } });
+  revalidatePath("/products");
+  return { success: `${payload.length} productos importados correctamente.` };
+}
