@@ -10,16 +10,7 @@ import {
   getAdminStats,
   getAuditLogs,
 } from "@/features/admin/data";
-
-const actionLabels: Record<string, string> = {
-  "business.created": "Negocio creado",
-  "business.updated": "Negocio actualizado",
-  "business.logo_updated": "Logotipo actualizado",
-  "owner.created": "Propietario creado",
-  "owner.updated": "Propietario actualizado",
-  "owner.activated": "Propietario activado",
-  "owner.deactivated": "Propietario desactivado",
-};
+import { getAuditActionLabel } from "@/features/admin/audit-labels";
 
 export default async function AdminPage() {
   const [stats, activity] = await Promise.all([
@@ -83,7 +74,7 @@ export default async function AdminPage() {
               <li className="flex items-center justify-between gap-4 py-3" key={entry.id}>
                 <div>
                   <p className="text-sm font-semibold">
-                    {actionLabels[entry.action] ?? entry.action}
+                    {getAuditActionLabel(entry.action)}
                   </p>
                   <p className="text-xs text-muted">
                     {entry.businesses?.name ?? "Plataforma"}
