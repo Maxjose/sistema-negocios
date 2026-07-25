@@ -49,12 +49,23 @@ export function BusinessFeaturesForm({ business }: { business: Business }) {
               {option.description}
             </span>
           </span>
-          <input
-            className="mt-1 size-5 accent-brand"
-            defaultChecked={business[option.name]}
-            name={option.name}
-            type="checkbox"
-          />
+          <span className="relative mt-1 inline-flex shrink-0">
+            <input
+              className="peer sr-only"
+              defaultChecked={business[option.name]}
+              name={option.name}
+              role="switch"
+              type="checkbox"
+            />
+            <span
+              aria-hidden="true"
+              className="h-7 w-12 rounded-full bg-slate-300 transition-colors peer-checked:bg-brand peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1 top-1 size-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5"
+            />
+          </span>
         </label>
       ))}
       {state.error && (
