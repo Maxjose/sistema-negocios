@@ -13,6 +13,12 @@ export type PaymentMethod = {
   display_order: number;
 };
 
+export type BusinessFeatures = {
+  use_stock: boolean;
+  allow_discounts: boolean;
+  allow_sale_notes: boolean;
+};
+
 export type Product = {
   id: string;
   name: string;

@@ -33,6 +33,8 @@ export async function confirmSale(_state: SaleState, formData: FormData): Promis
   });
   if (error) {
     if (error.message.includes("INSUFFICIENT_STOCK")) return { error: "La existencia cambió. Revisa las cantidades." };
+    if (error.message.includes("DISCOUNTS_DISABLED")) return { error: "Los descuentos están desactivados para este negocio." };
+    if (error.message.includes("SALE_NOTES_DISABLED")) return { error: "Las notas están desactivadas para este negocio." };
     return { error: `No se pudo confirmar la venta: ${error.message}` };
   }
   revalidatePath("/products");

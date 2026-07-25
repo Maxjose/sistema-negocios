@@ -13,6 +13,7 @@
     "test:sales": "node --env-file=.env scripts/verify-sales-transactions.mjs",
     "test:reports": "node --env-file=.env scripts/verify-business-report.mjs",
     "test:security": "node --env-file=.env scripts/verify-access-security.mjs",
+    "test:features": "node --env-file=.env scripts/verify-business-features.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "test:watch": "vitest",
     "admin:create": "node --env-file=.env scripts/create-super-admin.mjs",

@@ -6,6 +6,7 @@ import type {
   Category,
   PaymentMethod,
   Product,
+  BusinessFeatures,
 } from "@/features/catalog/types";
 
 async function ownerClient() {
@@ -33,6 +34,16 @@ export async function getPaymentMethods(): Promise<PaymentMethod[]> {
     .order("name");
   if (error) throw new Error(error.message);
   return data as PaymentMethod[];
+}
+
+export async function getBusinessFeatures(): Promise<BusinessFeatures> {
+  const supabase = await ownerClient();
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("use_stock, allow_discounts, allow_sale_notes")
+    .single();
+  if (error) throw new Error(error.message);
+  return data as BusinessFeatures;
 }
 
 export async function getProducts(): Promise<Product[]> {

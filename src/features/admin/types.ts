@@ -10,6 +10,9 @@ export type Business = {
   contact_phone: string | null;
   address: string | null;
   status: BusinessStatus;
+  use_stock: boolean;
+  allow_discounts: boolean;
+  allow_sale_notes: boolean;
   created_at: string;
 };
 

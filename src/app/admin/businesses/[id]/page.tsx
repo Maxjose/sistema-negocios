@@ -4,16 +4,21 @@ import { ArrowLeft, Building2 } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { BusinessForm } from "@/features/admin/business-form";
+import { BusinessFeaturesForm } from "@/features/admin/business-features-form";
 import { getBusiness } from "@/features/admin/data";
 import { LogoForm } from "@/features/admin/logo-form";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function BusinessDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { id } = await params;
+  const { tab } = await searchParams;
+  const activeTab = tab === "features" ? "features" : "information";
   const business = await getBusiness(id);
   if (!business) notFound();
 
@@ -45,19 +50,53 @@ export default async function BusinessDetailPage({
         </div>
       </div>
 
-      <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_17rem]">
-        <section className="rounded-2xl border bg-surface p-5 sm:p-7">
-          <h3 className="mb-6 font-bold">Información del negocio</h3>
-          <BusinessForm business={business} />
-        </section>
-        <aside className="h-fit rounded-2xl border bg-surface p-5">
-          <h3 className="font-bold">Logotipo</h3>
-          <p className="mb-4 mt-2 text-xs leading-5 text-muted">
-            Visible para los propietarios dentro de su espacio.
+      <nav aria-label="Secciones del negocio" className="mt-7 flex gap-2 border-b">
+        <Link
+          className={`border-b-2 px-4 py-3 text-sm font-semibold ${
+            activeTab === "information"
+              ? "border-brand text-brand"
+              : "border-transparent text-muted"
+          }`}
+          href={`/admin/businesses/${id}?tab=information`}
+        >
+          Información del negocio
+        </Link>
+        <Link
+          className={`border-b-2 px-4 py-3 text-sm font-semibold ${
+            activeTab === "features"
+              ? "border-brand text-brand"
+              : "border-transparent text-muted"
+          }`}
+          href={`/admin/businesses/${id}?tab=features`}
+        >
+          Funciones
+        </Link>
+      </nav>
+
+      {activeTab === "information" ? (
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_17rem]">
+          <section className="rounded-2xl border bg-surface p-5 sm:p-7">
+            <h3 className="mb-6 font-bold">Información del negocio</h3>
+            <BusinessForm business={business} />
+          </section>
+          <aside className="h-fit rounded-2xl border bg-surface p-5">
+            <h3 className="font-bold">Logotipo</h3>
+            <p className="mb-4 mt-2 text-xs leading-5 text-muted">
+              Visible para los propietarios dentro de su espacio.
+            </p>
+            <LogoForm businessId={business.id} />
+          </aside>
+        </div>
+      ) : (
+        <section className="mt-6 rounded-2xl border bg-surface p-5 sm:p-7">
+          <h3 className="font-bold">Funciones disponibles</h3>
+          <p className="mb-6 mt-2 text-sm leading-6 text-muted">
+            Estos controles modifican las herramientas y validaciones del
+            propietario.
           </p>
-          <LogoForm businessId={business.id} />
-        </aside>
-      </div>
+          <BusinessFeaturesForm business={business} />
+        </section>
+      )}
     </div>
   );
 }

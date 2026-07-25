@@ -12,6 +12,7 @@ import {
   CategoryCreateForm,
   PaymentCreateForm,
 } from "@/features/catalog/settings-forms";
+import { AccountPasswordForm } from "@/features/auth/account-password-form";
 
 export default async function SettingsPage() {
   const [categories, methods] = await Promise.all([
@@ -126,6 +127,13 @@ export default async function SettingsPage() {
           </ul>
         </section>
       </div>
+      <section className="mt-6 max-w-xl rounded-2xl border bg-surface p-5">
+        <h3 className="font-bold">Seguridad de la cuenta</h3>
+        <p className="mb-5 mt-1 text-sm text-muted">
+          Cambia la contraseña utilizada para ingresar al sistema.
+        </p>
+        <AccountPasswordForm />
+      </section>
     </div>
   );
 }

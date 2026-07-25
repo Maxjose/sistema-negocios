@@ -11,6 +11,7 @@ export type LoginState = {
 
 export type PasswordChangeState = {
   error?: string;
+  success?: string;
 };
 
 const loginSchema = z.object({
@@ -128,6 +129,53 @@ export async function changeInitialPassword(
     .eq("id", userId)
     .single();
   redirect(profile?.role === "super_admin" ? "/admin" : "/dashboard");
+}
+
+const accountPasswordSchema = z
+  .object({
+    current_password: z.string().min(8).max(128),
+    password: z.string().min(12).max(128),
+    confirmation: z.string().min(12).max(128),
+  })
+  .refine((values) => values.password === values.confirmation, {
+    message: "Las contraseñas nuevas no coinciden.",
+  })
+  .refine((values) => values.current_password !== values.password, {
+    message: "La nueva contraseña debe ser diferente a la actual.",
+  });
+
+export async function changeAccountPassword(
+  _previousState: PasswordChangeState,
+  formData: FormData,
+): Promise<PasswordChangeState> {
+  const parsed = accountPasswordSchema.safeParse({
+    current_password: formData.get("current_password"),
+    password: formData.get("password"),
+    confirmation: formData.get("confirmation"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Revisa las contraseñas." };
+  }
+
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const email = userData.user?.email;
+  if (!email) redirect("/login");
+
+  const { error: verificationError } = await supabase.auth.signInWithPassword({
+    email,
+    password: parsed.data.current_password,
+  });
+  if (verificationError) return { error: "La contraseña actual no es correcta." };
+
+  const { error: passwordError } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  });
+  if (passwordError) return { error: "No se pudo actualizar la contraseña." };
+
+  const { error: auditError } = await supabase.rpc("record_password_change");
+  if (auditError) return { error: "La contraseña cambió, pero no se pudo registrar la acción." };
+  return { success: "Contraseña actualizada correctamente." };
 }
 
 export async function logout() {

@@ -38,6 +38,12 @@ const updateOwnerSchema = z.object({
   password: z.union([z.literal(""), z.string().min(12).max(128)]),
 });
 
+const businessFeaturesSchema = z.object({
+  use_stock: z.boolean(),
+  allow_discounts: z.boolean(),
+  allow_sale_notes: z.boolean(),
+});
+
 async function audit(input: {
   action: string;
   entityType: string;
@@ -155,6 +161,41 @@ export async function updateBusiness(
   });
   revalidatePath("/admin");
   revalidatePath("/admin/businesses");
+  revalidatePath(`/admin/businesses/${id}`);
+  return {};
+}
+
+export async function updateBusinessFeatures(
+  id: string,
+  _state: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  await requireRole("super_admin");
+  const parsed = businessFeaturesSchema.safeParse({
+    use_stock: formData.get("use_stock") === "on",
+    allow_discounts: formData.get("allow_discounts") === "on",
+    allow_sale_notes: formData.get("allow_sale_notes") === "on",
+  });
+  if (!parsed.success) return { error: "No se pudo validar la configuración." };
+
+  const admin = createAdminClient();
+  const { data: before } = await admin
+    .from("businesses")
+    .select("use_stock, allow_discounts, allow_sale_notes")
+    .eq("id", id)
+    .single();
+  if (!before) return { error: "El negocio no existe." };
+
+  const { error } = await admin.from("businesses").update(parsed.data).eq("id", id);
+  if (error) return { error: error.message };
+  await audit({
+    action: "business.features_updated",
+    entityType: "business",
+    entityId: id,
+    businessId: id,
+    before,
+    after: parsed.data,
+  });
   revalidatePath(`/admin/businesses/${id}`);
   return {};
 }
