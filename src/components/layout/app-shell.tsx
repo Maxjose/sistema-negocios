@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Boxes,
@@ -17,6 +17,7 @@ import {
 import { BrandMark } from "@/components/brand/brand-mark";
 import { logout } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -41,6 +42,11 @@ const adminLinks = [
   { label: "Actividad", href: "/admin/activity", icon: ReceiptText },
   { label: "Configuración", href: "/admin/settings", icon: Settings },
 ];
+
+function LinkPendingIndicator() {
+  const { pending } = useLinkStatus();
+  return <span aria-hidden className={cn("ml-auto size-2 rounded-full bg-current opacity-0", pending && "animate-pulse opacity-50")} />;
+}
 
 export function AppShell({ children, role, title, userName }: AppShellProps) {
   const links = role === "admin" ? adminLinks : ownerLinks;
@@ -70,6 +76,7 @@ export function AppShell({ children, role, title, userName }: AppShellProps) {
             >
               <Icon aria-hidden="true" className="size-[1.125rem]" />
               {label}
+              <LinkPendingIndicator />
             </Link>
           ))}
         </nav>
@@ -90,12 +97,12 @@ export function AppShell({ children, role, title, userName }: AppShellProps) {
             <BrandMark compact className="lg:hidden" />
             <h1 className="text-lg font-bold tracking-tight">{title}</h1>
           </div>
-          <div className="text-right">
+          <div className="flex items-center gap-3"><ThemeToggle /><div className="text-right">
             <p className="text-sm font-semibold">{userName}</p>
             <p className="text-xs text-muted">
               {role === "admin" ? "Administrador" : "Propietario"}
             </p>
-          </div>
+          </div></div>
         </header>
         <main className="p-4 pb-24 sm:p-6 sm:pb-24 lg:p-8">{children}</main>
       </div>
@@ -115,6 +122,7 @@ export function AppShell({ children, role, title, userName }: AppShellProps) {
           >
             <Icon aria-hidden="true" className="size-5" />
             <span className="max-w-16 truncate">{label}</span>
+            <LinkPendingIndicator />
           </Link>
         ))}
       </nav>

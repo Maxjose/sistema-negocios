@@ -1,4 +1,4 @@
-import { Boxes, CircleDollarSign, ReceiptText, ShoppingBasket, TrendingUp, WalletCards } from "lucide-react";
+import { Boxes, CircleDollarSign, ReceiptText, ShoppingBasket, TrendingUp, Trophy, WalletCards } from "lucide-react";
 import { formatMoney } from "@/lib/money";
 import type { BusinessReport } from "@/features/reports/types";
 
@@ -17,6 +17,7 @@ export function ReportView({ report, previous, detailed = false, useStock = true
     { label: "Ticket promedio", value: formatMoney(Number(report.summary.average_ticket), currency), delta: change(Number(report.summary.average_ticket), Number(previous.summary.average_ticket)), icon: WalletCards },
     { label: "Unidades vendidas", value: String(report.summary.units_sold), delta: change(report.summary.units_sold, previous.summary.units_sold), icon: ShoppingBasket },
     { label: "Margen bruto", value: `${margin.toFixed(1)}%`, icon: TrendingUp },
+    { label: "Producto más vendido", value: report.top_products[0]?.product_name ?? "Sin ventas", icon: Trophy },
     ...(useStock ? [{ label: "Stock bajo", value: String(report.inventory.low_stock), icon: Boxes }] : []),
   ];
   const maxDaily = Math.max(1, ...report.daily.map((item) => Number(item.sales)));

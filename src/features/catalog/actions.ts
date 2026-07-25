@@ -140,6 +140,21 @@ export async function updatePaymentMethod(id: string, formData: FormData) {
   revalidatePath("/settings");
 }
 
+export async function reorderSettings(kind: "categories" | "payment_methods", orderedIds: string[]) {
+  const parsed = z.object({ kind: z.enum(["categories", "payment_methods"]), ids: z.array(z.uuid()).max(200) }).safeParse({ kind, ids: orderedIds });
+  if (!parsed.success) throw new Error("Orden inválido.");
+  const { profile, businessId, supabase } = await context();
+  const { data, error: readError } = await supabase.from(kind).select("id");
+  if (readError) throw new Error(readError.message);
+  const allowed = new Set((data ?? []).map((item) => item.id));
+  if (parsed.data.ids.length !== allowed.size || parsed.data.ids.some((id) => !allowed.has(id))) throw new Error("La lista cambió. Recarga e inténtalo nuevamente.");
+  const results = await Promise.all(parsed.data.ids.map((id, index) => supabase.from(kind).update({ display_order: index }).eq("id", id)));
+  const updateError = results.find((result) => result.error)?.error;
+  if (updateError) throw new Error(updateError.message);
+  await audit({ action: `${kind}.reordered`, type: kind, id: "order", businessId, actorId: profile.id, after: { ids: parsed.data.ids } });
+  revalidatePath("/settings");
+}
+
 const productSchema = z.object({
   name: z.string().trim().min(1).max(160),
   sku: z.string().trim().max(80).optional(),
