@@ -69,8 +69,13 @@ export function BusinessFeaturesForm({ business }: { business: Business }) {
         </label>
       ))}
       {state.error && (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p aria-live="polite" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
           {state.error}
+        </p>
+      )}
+      {state.success && (
+        <p aria-live="polite" className="rounded-xl bg-accent px-4 py-3 text-sm text-brand-strong">
+          {state.success}
         </p>
       )}
       <div className="flex justify-end">

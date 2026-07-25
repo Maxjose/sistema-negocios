@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus, UserRound } from "lucide-react";
 
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { setOwnerStatus } from "@/features/admin/actions";
 import { getOwners } from "@/features/admin/data";
 
@@ -29,7 +30,30 @@ export default async function UsersPage() {
           <p className="mt-2 text-sm text-muted">Crea un negocio antes de asignar su primer acceso.</p>
         </section>
       ) : (
-        <div className="mt-7 overflow-hidden rounded-2xl border bg-surface">
+        <>
+        <div className="mt-7 space-y-3 sm:hidden">
+          {owners.map((owner) => {
+            const nextStatus = owner.status === "active" ? "inactive" : "active";
+            return (
+              <article className="rounded-2xl border bg-surface p-5" key={owner.id}>
+                <div className="flex items-start justify-between gap-3">
+                  <div><h3 className="font-semibold">{owner.full_name}</h3><p className="mt-1 text-xs text-muted">{owner.email}</p></div>
+                  <span className={owner.status === "active" ? "rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-brand-strong" : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"}>{owner.status === "active" ? "Activo" : "Inactivo"}</span>
+                </div>
+                <p className="mt-3 text-sm text-muted">{owner.business_name}</p>
+                <div className="mt-4 flex items-center gap-4">
+                  <Link className="text-sm font-semibold text-brand" href={`/admin/users/${owner.id}`}>Gestionar</Link>
+                  <form action={setOwnerStatus.bind(null, owner.id, nextStatus)}>
+                    <ConfirmSubmitButton className={owner.status === "active" ? "text-red-700" : "text-brand"} confirmMessage={owner.status === "active" ? `¿Desactivar el acceso de ${owner.full_name}? Sus sesiones abiertas se cerrarán.` : `¿Activar el acceso de ${owner.full_name}?`} pendingLabel="Guardando...">
+                      {owner.status === "active" ? "Desactivar" : "Activar"}
+                    </ConfirmSubmitButton>
+                  </form>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <div className="mt-7 hidden overflow-hidden rounded-2xl border bg-surface sm:block">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-background text-xs uppercase tracking-wide text-muted">
@@ -61,9 +85,13 @@ export default async function UsersPage() {
                             Gestionar
                           </Link>
                           <form action={setOwnerStatus.bind(null, owner.id, nextStatus)}>
-                          <button className={owner.status === "active" ? "text-sm font-semibold text-red-700" : "text-sm font-semibold text-brand"} type="submit">
+                          <ConfirmSubmitButton
+                            className={owner.status === "active" ? "text-red-700" : "text-brand"}
+                            confirmMessage={owner.status === "active" ? `¿Desactivar el acceso de ${owner.full_name}? Sus sesiones abiertas se cerrarán.` : `¿Activar el acceso de ${owner.full_name}?`}
+                            pendingLabel="Guardando..."
+                          >
                             {owner.status === "active" ? "Desactivar" : "Activar"}
-                          </button>
+                          </ConfirmSubmitButton>
                           </form>
                         </div>
                       </td>
@@ -74,6 +102,7 @@ export default async function UsersPage() {
             </table>
           </div>
         </div>
+        </>
       )}
     </div>
   );

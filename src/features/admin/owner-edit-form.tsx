@@ -79,12 +79,18 @@ export function OwnerEditForm({
           type="password"
         />
         <span className="mt-1.5 block text-xs text-muted">
-          Al escribir una nueva contraseña se reemplazará inmediatamente.
+          Al restablecerla se cerrarán sus sesiones y deberá cambiarla en el
+          siguiente acceso.
         </span>
       </label>
       {state.error && (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p aria-live="polite" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
           {state.error}
+        </p>
+      )}
+      {state.success && (
+        <p aria-live="polite" className="rounded-xl bg-accent px-4 py-3 text-sm text-brand-strong">
+          {state.success}
         </p>
       )}
       <Button className="w-full" disabled={pending} type="submit">

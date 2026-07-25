@@ -13,6 +13,7 @@ import {
   PaymentCreateForm,
 } from "@/features/catalog/settings-forms";
 import { AccountPasswordForm } from "@/features/auth/account-password-form";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 
 export default async function SettingsPage() {
   const [categories, methods] = await Promise.all([
@@ -61,16 +62,17 @@ export default async function SettingsPage() {
                   action={toggleCategory.bind(null, item.id, !item.is_active)}
                   className="mt-2 text-right"
                 >
-                  <button
+                  <ConfirmSubmitButton
                     className={
                       item.is_active
                         ? "text-xs font-semibold text-red-700"
                         : "text-xs font-semibold text-brand"
                     }
-                    type="submit"
+                    confirmMessage={`¿${item.is_active ? "Desactivar" : "Activar"} la categoría ${item.name}?`}
+                    pendingLabel="Guardando..."
                   >
                     {item.is_active ? "Desactivar" : "Activar"}
-                  </button>
+                  </ConfirmSubmitButton>
                 </form>
               </li>
             ))}
@@ -111,16 +113,17 @@ export default async function SettingsPage() {
                   action={togglePaymentMethod.bind(null, item.id, !item.is_active)}
                   className="mt-2 text-right"
                 >
-                  <button
+                  <ConfirmSubmitButton
                     className={
                       item.is_active
                         ? "text-xs font-semibold text-red-700"
                         : "text-xs font-semibold text-brand"
                     }
-                    type="submit"
+                    confirmMessage={`¿${item.is_active ? "Desactivar" : "Activar"} el método ${item.name}?`}
+                    pendingLabel="Guardando..."
                   >
                     {item.is_active ? "Desactivar" : "Activar"}
-                  </button>
+                  </ConfirmSubmitButton>
                 </form>
               </li>
             ))}

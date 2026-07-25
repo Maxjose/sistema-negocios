@@ -6,9 +6,11 @@ import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 export type AdminActionState = {
   error?: string;
+  success?: string;
 };
 
 const optionalText = z.string().trim().max(250).optional();
@@ -65,6 +67,14 @@ async function audit(input: {
   });
 
   if (error) throw new Error(`Unable to write audit log: ${error.message}`);
+}
+
+async function revokeOwnerSessions(userId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("revoke_owner_sessions", {
+    p_user_id: userId,
+  });
+  if (error) throw new Error(`Unable to revoke sessions: ${error.message}`);
 }
 
 function businessInput(formData: FormData) {
@@ -162,7 +172,7 @@ export async function updateBusiness(
   revalidatePath("/admin");
   revalidatePath("/admin/businesses");
   revalidatePath(`/admin/businesses/${id}`);
-  return {};
+  return { success: "Información actualizada correctamente." };
 }
 
 export async function updateBusinessFeatures(
@@ -197,7 +207,7 @@ export async function updateBusinessFeatures(
     after: parsed.data,
   });
   revalidatePath(`/admin/businesses/${id}`);
-  return {};
+  return { success: "Funciones actualizadas correctamente." };
 }
 
 export async function uploadBusinessLogo(
@@ -242,7 +252,7 @@ export async function uploadBusinessLogo(
     after: { logo_path: path },
   });
   revalidatePath(`/admin/businesses/${id}`);
-  return {};
+  return { success: "Logotipo actualizado correctamente." };
 }
 
 export async function createOwner(
@@ -310,6 +320,7 @@ export async function setOwnerStatus(userId: string, status: "active" | "inactiv
 
   const { error } = await admin.from("profiles").update({ status }).eq("id", userId);
   if (error) throw new Error(error.message);
+  if (status === "inactive") await revokeOwnerSessions(userId);
 
   await audit({
     action: status === "active" ? "owner.activated" : "owner.deactivated",
@@ -353,6 +364,7 @@ export async function updateOwner(
     full_name: parsed.data.full_name,
     business_id: parsed.data.business_id,
     status: parsed.data.status,
+    must_change_password: parsed.data.password ? true : before.must_change_password,
   };
   const { error: profileError } = await admin.from("profiles").update(profilePayload).eq("id", userId);
   if (profileError) return { error: profileError.message };
@@ -377,9 +389,14 @@ export async function updateOwner(
         full_name: before.full_name,
         business_id: before.business_id,
         status: before.status,
+        must_change_password: before.must_change_password,
       })
       .eq("id", userId);
     return { error: authError.message };
+  }
+
+  if (parsed.data.status === "inactive" || parsed.data.password) {
+    await revokeOwnerSessions(userId);
   }
 
   await audit({
@@ -401,5 +418,5 @@ export async function updateOwner(
   revalidatePath("/admin");
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${userId}`);
-  return {};
+  return { success: "Propietario actualizado correctamente." };
 }

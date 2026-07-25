@@ -74,19 +74,51 @@ export async function getOwner(id: string): Promise<OwnerProfile | null> {
   return owners.find((owner) => owner.id === id) ?? null;
 }
 
-export async function getAuditLogs(limit = 100): Promise<AuditLog[]> {
+export type AuditFilters = {
+  businessId?: string;
+  actorId?: string;
+  action?: string;
+  from?: string;
+  to?: string;
+};
+
+export async function getAuditLogs(
+  limit = 100,
+  filters: AuditFilters = {},
+): Promise<AuditLog[]> {
   await requireRole("super_admin");
   const admin = createAdminClient();
-  const { data, error } = await admin
+  let query = admin
     .from("audit_logs")
     .select(
       "id, action, entity_type, entity_id, created_at, business_id, actor_user_id, businesses(name), profiles(full_name)",
     )
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (filters.businessId) query = query.eq("business_id", filters.businessId);
+  if (filters.actorId) query = query.eq("actor_user_id", filters.actorId);
+  if (filters.action) query = query.eq("action", filters.action);
+  if (filters.from) query = query.gte("created_at", `${filters.from}T00:00:00`);
+  if (filters.to) {
+    const until = new Date(`${filters.to}T00:00:00Z`);
+    until.setUTCDate(until.getUTCDate() + 1);
+    query = query.lt("created_at", until.toISOString());
+  }
+  const { data, error } = await query;
 
   if (error) throw new Error(`Unable to load audit logs: ${error.message}`);
   return data as unknown as AuditLog[];
+}
+
+export async function getAuditActors() {
+  await requireRole("super_admin");
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("profiles")
+    .select("id, full_name")
+    .order("full_name");
+  if (error) throw new Error(`Unable to load audit actors: ${error.message}`);
+  return data ?? [];
 }
 
 export async function getAdminStats() {

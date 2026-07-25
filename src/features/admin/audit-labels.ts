@@ -7,6 +7,7 @@ export const auditActionLabels: Record<string, string> = {
   "owner.updated": "Propietario actualizado",
   "owner.activated": "Propietario activado",
   "owner.deactivated": "Propietario desactivado",
+  "owner.sessions_revoked": "Sesiones del propietario revocadas",
   "auth.login": "Inicio de sesión",
   "auth.initial_password_changed": "Contraseña inicial cambiada",
   "auth.password_changed": "Contraseña cambiada",

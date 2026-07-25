@@ -28,7 +28,24 @@ export default async function BusinessesPage() {
           <p className="mt-2 text-sm text-muted">Crea el primero para asignarle propietarios.</p>
         </section>
       ) : (
-        <div className="mt-7 overflow-hidden rounded-2xl border bg-surface">
+        <>
+        <div className="mt-7 space-y-3 sm:hidden">
+          {businesses.map((business) => (
+            <article className="rounded-2xl border bg-surface p-5" key={business.id}>
+              <div className="flex items-start justify-between gap-3">
+                <div><h3 className="font-semibold">{business.name}</h3><p className="mt-1 text-xs text-muted">{business.currency_code} · {business.timezone}</p></div>
+                <span className={business.status === "active" ? "rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-brand-strong" : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"}>{business.status === "active" ? "Activo" : "Inactivo"}</span>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full bg-background px-2.5 py-1">{business.use_stock ? "Con stock" : "Sin stock"}</span>
+                {business.allow_discounts && <span className="rounded-full bg-background px-2.5 py-1">Descuentos</span>}
+                {business.allow_sale_notes && <span className="rounded-full bg-background px-2.5 py-1">Notas</span>}
+              </div>
+              <Link className="mt-4 inline-flex font-semibold text-brand" href={`/admin/businesses/${business.id}`}>Gestionar</Link>
+            </article>
+          ))}
+        </div>
+        <div className="mt-7 hidden overflow-hidden rounded-2xl border bg-surface sm:block">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-background text-xs uppercase tracking-wide text-muted">
@@ -36,6 +53,7 @@ export default async function BusinessesPage() {
                   <th className="px-5 py-3">Negocio</th>
                   <th className="px-5 py-3">Moneda</th>
                   <th className="px-5 py-3">Zona horaria</th>
+                  <th className="px-5 py-3">Funciones</th>
                   <th className="px-5 py-3">Estado</th>
                   <th className="px-5 py-3 text-right">Acción</th>
                 </tr>
@@ -46,6 +64,7 @@ export default async function BusinessesPage() {
                     <td className="px-5 py-4 font-semibold">{business.name}</td>
                     <td className="px-5 py-4">{business.currency_code}</td>
                     <td className="px-5 py-4 text-muted">{business.timezone}</td>
+                    <td className="px-5 py-4"><div className="flex flex-wrap gap-1.5 text-xs"><span className="rounded-full bg-background px-2 py-1">{business.use_stock ? "Stock" : "Sin stock"}</span>{business.allow_discounts && <span className="rounded-full bg-background px-2 py-1">Descuentos</span>}{business.allow_sale_notes && <span className="rounded-full bg-background px-2 py-1">Notas</span>}</div></td>
                     <td className="px-5 py-4">
                       <span className={business.status === "active" ? "rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-brand-strong" : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"}>
                         {business.status === "active" ? "Activo" : "Inactivo"}
@@ -62,6 +81,7 @@ export default async function BusinessesPage() {
             </table>
           </div>
         </div>
+        </>
       )}
     </div>
   );
