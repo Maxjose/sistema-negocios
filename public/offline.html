@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#176b4d" />
+    <title>Sin conexión | Sistema Negocios</title>
+    <style>
+      :root { color: #14211b; background: #f4f7f5; font-family: Inter, "Segoe UI", system-ui, sans-serif; }
+      body { display: grid; min-height: 100vh; margin: 0; place-items: center; padding: 24px; box-sizing: border-box; }
+      main { width: min(100%, 420px); padding: 36px; border: 1px solid #dbe5df; border-radius: 24px; background: #fff; box-sizing: border-box; box-shadow: 0 12px 40px rgb(20 33 27 / 8%); }
+      .mark { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 14px; background: #176b4d; color: #fff; font-weight: 800; }
+      h1 { margin: 28px 0 12px; font-size: 28px; line-height: 1.15; }
+      p { margin: 0; color: #64736c; line-height: 1.6; }
+      button { min-height: 44px; margin-top: 28px; padding: 0 18px; border: 0; border-radius: 12px; background: #176b4d; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">SN</div>
+      <h1>Estás sin conexión</h1>
+      <p>Conéctate a internet para consultar datos y registrar cambios de forma segura.</p>
+      <button type="button" onclick="location.reload()">Intentar de nuevo</button>
+    </main>
+  </body>
+</html>
