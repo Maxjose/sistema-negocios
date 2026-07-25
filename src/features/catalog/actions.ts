@@ -30,7 +30,7 @@ async function audit(input: {
   after?: unknown;
 }) {
   const admin = createAdminClient();
-  await admin.from("audit_logs").insert({
+  const { error } = await admin.from("audit_logs").insert({
     actor_user_id: input.actorId,
     business_id: input.businessId,
     action: input.action,
@@ -39,6 +39,7 @@ async function audit(input: {
     before_data: input.before ?? null,
     after_data: input.after ?? null,
   });
+  if (error) throw new Error(`Unable to write audit log: ${error.message}`);
 }
 
 const settingSchema = z.object({

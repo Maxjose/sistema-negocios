@@ -14,7 +14,13 @@ export default async function LoginPage() {
   const profile = await getCurrentProfile();
 
   if (profile) {
-    redirect(profile.role === "super_admin" ? "/admin" : "/dashboard");
+    redirect(
+      profile.must_change_password
+        ? "/change-password"
+        : profile.role === "super_admin"
+          ? "/admin"
+          : "/dashboard",
+    );
   }
 
   return (

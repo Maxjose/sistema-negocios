@@ -1,5 +1,6 @@
 import "server-only";
 
+import { requireRole } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   AuditLog,
@@ -8,6 +9,7 @@ import type {
 } from "@/features/admin/types";
 
 export async function getBusinesses(): Promise<Business[]> {
+  await requireRole("super_admin");
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("businesses")
@@ -19,6 +21,7 @@ export async function getBusinesses(): Promise<Business[]> {
 }
 
 export async function getBusiness(id: string): Promise<Business | null> {
+  await requireRole("super_admin");
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("businesses")
@@ -31,6 +34,7 @@ export async function getBusiness(id: string): Promise<Business | null> {
 }
 
 export async function getOwners(): Promise<OwnerProfile[]> {
+  await requireRole("super_admin");
   const admin = createAdminClient();
   const [{ data: profiles, error }, { data: authData, error: authError }] =
     await Promise.all([
@@ -71,6 +75,7 @@ export async function getOwner(id: string): Promise<OwnerProfile | null> {
 }
 
 export async function getAuditLogs(limit = 100): Promise<AuditLog[]> {
+  await requireRole("super_admin");
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("audit_logs")
@@ -85,6 +90,7 @@ export async function getAuditLogs(limit = 100): Promise<AuditLog[]> {
 }
 
 export async function getAdminStats() {
+  await requireRole("super_admin");
   const admin = createAdminClient();
   const [
     { count: businessCount },
