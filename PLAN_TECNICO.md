@@ -7,7 +7,8 @@
 - Fase 2: completada.
 - Fase 3: completada.
 - Fase 4: completada.
-- Fase 5: siguiente — ventas transaccionales.
+- Fase 5: completada.
+- Fase 6: siguiente — dashboard y reportes.
 
 ## 1. Objetivo del MVP
 

@@ -6,8 +6,8 @@ y ganancias de pequeños negocios.
 ## Estado
 
 Las fases de base técnica, autenticación, administración, catálogo e inventario
-simple están terminadas. El alcance y las fases completas están documentados
-en `PLAN_TECNICO.md`.
+simple y ventas transaccionales están terminadas. El alcance y las fases
+completas están documentados en `PLAN_TECNICO.md`.
 
 ## Requisitos
 
@@ -37,6 +37,8 @@ También puede ejecutarse todo con `npm run check`.
 
 La prueba `npm run test:rls` verifica contra Supabase que dos negocios no puedan
 leer ni modificar datos entre sí y elimina sus registros temporales al terminar.
+La prueba `npm run test:sales` comprueba ventas, sobreventa, descuento de stock
+y anulaciones con restauración automática.
 
 ## Rutas iniciales
 
@@ -48,6 +50,8 @@ leer ni modificar datos entre sí y elimina sus registros temporales al terminar
 - `/admin/activity`: auditoría administrativa.
 - `/products`: catálogo e inventario del propietario.
 - `/settings`: categorías y métodos de pago del propietario.
+- `/sales/new`: punto de venta.
+- `/sales`: historial de ventas.
 
 Las rutas están protegidas mediante sesiones Supabase SSR y autorización por
 rol. El esquema, las políticas RLS y las instrucciones de migración están en
