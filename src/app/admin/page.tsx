@@ -60,9 +60,9 @@ export default async function AdminPage() {
         ))}
       </section>
       <section className="mt-6 grid gap-3 sm:grid-cols-3">
-        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4"><p className="text-sm font-semibold text-amber-900">Negocios inactivos</p><p className="mt-2 text-2xl font-bold text-amber-900">{alerts.inactiveBusinesses}</p></article>
-        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4"><p className="text-sm font-semibold text-amber-900">Cambio de clave pendiente</p><p className="mt-2 text-2xl font-bold text-amber-900">{alerts.pendingPasswordChange}</p></article>
-        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4"><p className="text-sm font-semibold text-amber-900">Sin acceso en 30 días</p><p className="mt-2 text-2xl font-bold text-amber-900">{alerts.ownersWithoutRecentAccess}</p></article>
+        <article className="rounded-2xl border bg-surface p-4 shadow-sm"><div className="mb-3 h-1 w-10 rounded-full bg-amber-500" /><p className="text-sm font-semibold text-muted">Negocios inactivos</p><p className="mt-2 text-2xl font-bold text-foreground">{alerts.inactiveBusinesses}</p></article>
+        <article className="rounded-2xl border bg-surface p-4 shadow-sm"><div className="mb-3 h-1 w-10 rounded-full bg-amber-500" /><p className="text-sm font-semibold text-muted">Cambio de clave pendiente</p><p className="mt-2 text-2xl font-bold text-foreground">{alerts.pendingPasswordChange}</p></article>
+        <article className="rounded-2xl border bg-surface p-4 shadow-sm"><div className="mb-3 h-1 w-10 rounded-full bg-amber-500" /><p className="text-sm font-semibold text-muted">Sin acceso en 30 días</p><p className="mt-2 text-2xl font-bold text-foreground">{alerts.ownersWithoutRecentAccess}</p></article>
       </section>
       <section className="mt-6 rounded-2xl border bg-surface p-6">
         <div className="flex items-center justify-between">
