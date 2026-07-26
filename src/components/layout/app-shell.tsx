@@ -3,7 +3,7 @@
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, LayoutDashboard, LogOut, ReceiptText, Settings, ShoppingCart, Store, UserCircle, UserRound, Users } from "lucide-react";
+import { Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, Ellipsis, LayoutDashboard, LogOut, ReceiptText, Settings, ShoppingCart, Store, UserCircle, UserRound, Users, X } from "lucide-react";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { logout } from "@/features/auth/actions";
@@ -69,6 +69,7 @@ function UserMenu({ planExpiresAt, planTier = "unlimited", role, userName }: { p
 }
 
 export function AppShell({ accentTheme = "blue", children, enableCredits = false, enableCustomers = false, planExpiresAt, planTier, role, title, userName }: AppShellProps) {
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const links = role === "admin" ? adminLinks : [
     ...ownerLinks.slice(0, 4),
     ...(enableCustomers ? [{ label: "Clientes", href: "/customers", icon: UserRound }] : []),
@@ -77,6 +78,9 @@ export function AppShell({ accentTheme = "blue", children, enableCredits = false
   ];
   const pathname = usePathname();
   const activeHref = links.filter(({ href }) => href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
+  const mobilePrimaryLinks = role === "owner" ? links.slice(0, 4) : links;
+  const mobileMoreLinks = role === "owner" ? links.slice(4) : [];
+  const mobileMoreActive = mobileMoreLinks.some(({ href }) => href === activeHref);
   return (
     <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[17rem_1fr]" data-accent={accentTheme} data-app-shell>
       <aside className="hidden border-r bg-surface px-4 py-6 lg:flex lg:flex-col">
@@ -92,8 +96,14 @@ export function AppShell({ accentTheme = "blue", children, enableCredits = false
         </header>
         <main className="p-4 pb-24 sm:p-6 sm:pb-24 lg:p-8">{children}</main>
       </div>
-      <nav aria-label="Navegación móvil" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t bg-surface px-1 pb-[env(safe-area-inset-bottom)] lg:hidden">
-        {links.slice(0, 5).map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href}><Icon aria-hidden="true" className="size-5" /><span className="max-w-16 truncate">{label}</span><LinkPendingIndicator /></Link>)}
+      {mobileMoreOpen && role === "owner" && <div className="fixed inset-0 z-20 bg-black/45 lg:hidden" onClick={() => setMobileMoreOpen(false)} role="presentation" />}
+      {mobileMoreOpen && role === "owner" && <section aria-label="Más opciones" className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 rounded-3xl border bg-surface p-3 shadow-2xl lg:hidden">
+        <div className="flex items-center justify-between px-2 pb-2"><h2 className="font-bold">Más opciones</h2><button aria-label="Cerrar más opciones" className="grid size-9 place-items-center rounded-xl text-muted hover:bg-accent" onClick={() => setMobileMoreOpen(false)} type="button"><X className="size-5" /></button></div>
+        <div className="grid grid-cols-2 gap-2">{mobileMoreLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-14 items-center gap-3 rounded-2xl px-4 text-sm font-semibold text-muted transition hover:bg-accent hover:text-brand-strong", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon className="size-5" />{label}<LinkPendingIndicator /></Link>)}</div>
+      </section>}
+      <nav aria-label="Navegación móvil" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-surface px-1 pb-[env(safe-area-inset-bottom)] lg:hidden">
+        {mobilePrimaryLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon aria-hidden="true" className="size-5" /><span className="max-w-16 truncate">{label}</span><LinkPendingIndicator /></Link>)}
+        {role === "owner" && <button aria-expanded={mobileMoreOpen} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", (mobileMoreActive || mobileMoreOpen) && "bg-accent text-brand-strong")} onClick={() => setMobileMoreOpen((open) => !open)} type="button"><Ellipsis className="size-5" /><span>Más</span></button>}
       </nav>
     </div>
   );
