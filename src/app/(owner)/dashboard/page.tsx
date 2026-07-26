@@ -25,7 +25,7 @@ export default async function DashboardPage({
           <p className="text-sm text-muted">Estado actual del negocio</p>
           <h2 className="mt-1 text-2xl font-bold">Resumen</h2>
         </div>
-        <PeriodFilter from={range.from} period={range.period} to={range.to} />
+        <div className="hidden sm:block"><PeriodFilter from={range.from} period={range.period} to={range.to} /></div>
       </div>
       <div className="mt-7">
         <ReportView

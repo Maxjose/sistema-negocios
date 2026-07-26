@@ -3,7 +3,7 @@
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, Ellipsis, LayoutDashboard, LogOut, ReceiptText, Settings, ShoppingCart, Store, UserCircle, UserRound, Users, X } from "lucide-react";
+import { Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, Grid2X2, LayoutDashboard, LogOut, ReceiptText, Settings, ShoppingCart, Store, UserCircle, UserRound, Users, X } from "lucide-react";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { logout } from "@/features/auth/actions";
@@ -102,8 +102,8 @@ export function AppShell({ accentTheme = "blue", children, enableCredits = false
         <div className="grid grid-cols-2 gap-2">{mobileMoreLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-14 items-center gap-3 rounded-2xl px-4 text-sm font-semibold text-muted transition hover:bg-accent hover:text-brand-strong", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon className="size-5" />{label}<LinkPendingIndicator /></Link>)}</div>
       </section>}
       <nav aria-label="Navegación móvil" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-surface px-1 pb-[env(safe-area-inset-bottom)] lg:hidden">
-        {mobilePrimaryLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon aria-hidden="true" className="size-5" /><span className="max-w-16 truncate">{label}</span><LinkPendingIndicator /></Link>)}
-        {role === "owner" && <button aria-expanded={mobileMoreOpen} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", (mobileMoreActive || mobileMoreOpen) && "bg-accent text-brand-strong")} onClick={() => setMobileMoreOpen((open) => !open)} type="button"><Ellipsis className="size-5" /><span>Más</span></button>}
+        {mobilePrimaryLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon aria-hidden="true" className="size-5" />{label === "Registrar venta" ? <><span className="max-w-16 truncate sm:hidden">Registrar</span><span className="hidden max-w-20 truncate sm:inline">Registrar venta</span></> : <span className="max-w-16 truncate">{label}</span>}<LinkPendingIndicator /></Link>)}
+        {role === "owner" && <button aria-expanded={mobileMoreOpen} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", (mobileMoreActive || mobileMoreOpen) && "bg-accent text-brand-strong")} onClick={() => setMobileMoreOpen((open) => !open)} type="button"><Grid2X2 aria-hidden="true" className="size-5" /><span className="max-w-16 truncate">Más</span></button>}
       </nav>
     </div>
   );
