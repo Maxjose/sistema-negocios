@@ -25,6 +25,11 @@ try {
   const client = createClient(url, publicKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { error: signInError } = await client.auth.signInWithPassword({ email, password });
   if (signInError) throw signInError;
+  const { error: defaultError } = await client.rpc("set_business_accent", { p_accent_theme: "default" });
+  if (defaultError) throw defaultError;
+  const { data: defaultSaved, error: defaultReadError } = await service.from("businesses").select("accent_theme").eq("id", ids.business).single();
+  if (defaultReadError) throw defaultReadError;
+  if (defaultSaved.accent_theme !== "default") throw new Error("Default accent theme was not persisted.");
   const { error: updateError } = await client.rpc("set_business_accent", { p_accent_theme: "violet" });
   if (updateError) throw updateError;
   const { data: saved, error: readError } = await service.from("businesses").select("accent_theme").eq("id", ids.business).single();
@@ -35,7 +40,7 @@ try {
   if (!invalidError?.message.includes("INVALID_ACCENT_THEME")) throw new Error("Invalid accent theme was accepted.");
   const { count: auditCount, error: auditError } = await service.from("audit_logs").select("*", { count: "exact", head: true }).eq("business_id", ids.business).eq("action", "business.accent_changed");
   if (auditError) throw auditError;
-  if (auditCount !== 1) throw new Error("Accent change was not audited.");
+  if (auditCount !== 2) throw new Error("Accent changes were not audited.");
   console.log("Accent theme check passed.");
 } finally {
   if (ids.business) await service.from("audit_logs").delete().eq("business_id", ids.business);

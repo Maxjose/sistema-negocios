@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { AccentTheme } from "@/features/catalog/types";
 
 export type CatalogState = { error?: string; success?: string };
-const accentSchema = z.enum(["emerald", "blue", "violet", "rose", "amber", "cyan"]);
+const accentSchema = z.enum(["default", "emerald", "blue", "violet", "rose", "amber", "cyan"]);
 
 export async function setBusinessAccent(accent: AccentTheme) {
   await requireRole("owner");

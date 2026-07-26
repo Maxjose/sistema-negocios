@@ -30,6 +30,7 @@
 [data-accent="rose"] { --brand: #e11d48; --brand-strong: #be123c; --accent: #ffe4e6; }
 [data-accent="amber"] { --brand: #b45309; --brand-strong: #92400e; --accent: #fef3c7; }
 [data-accent="cyan"] { --brand: #0e7490; --brand-strong: #155e75; --accent: #cffafe; }
+[data-accent="default"] { --brand: #176b4d; --brand-strong: #0e4e37; --accent: #dbf4e7; }
 
 .dark [data-accent="emerald"] { --brand: #45c995; --brand-strong: #8ae4c0; --accent: #17362b; }
 .dark [data-accent="blue"] { --brand: #7da2f8; --brand-strong: #b6c9ff; --accent: #202b45; }
@@ -37,6 +38,7 @@
 .dark [data-accent="rose"] { --brand: #fb7185; --brand-strong: #fda4af; --accent: #42232d; }
 .dark [data-accent="amber"] { --brand: #fbbf24; --brand-strong: #fcd873; --accent: #3c301d; }
 .dark [data-accent="cyan"] { --brand: #56cfe1; --brand-strong: #9de6ef; --accent: #19343a; }
+.dark [data-accent="default"] { --brand: #8da4e8; --brand-strong: #b8c6f5; --accent: #252b3a; }
 
 @media print {
   aside, nav, header, .print\:hidden { display: none !important; }

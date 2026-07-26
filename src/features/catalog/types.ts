@@ -22,7 +22,7 @@ export type BusinessFeatures = {
   enable_stock_adjustments: boolean;
 };
 
-export type AccentTheme = "emerald" | "blue" | "violet" | "rose" | "amber" | "cyan";
+export type AccentTheme = "default" | "emerald" | "blue" | "violet" | "rose" | "amber" | "cyan";
 
 export type Product = {
   id: string;

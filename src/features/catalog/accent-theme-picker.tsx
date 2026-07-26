@@ -6,6 +6,7 @@ import { setBusinessAccent } from "@/features/catalog/actions";
 import type { AccentTheme } from "@/features/catalog/types";
 
 const options: Array<{ id: AccentTheme; label: string; colors: string }> = [
+  { id: "default", label: "Predeterminado", colors: "from-[#176b4d] to-[#8da4e8]" },
   { id: "emerald", label: "Esmeralda", colors: "from-emerald-500 to-emerald-700" },
   { id: "blue", label: "Azul", colors: "from-blue-500 to-blue-700" },
   { id: "violet", label: "Violeta", colors: "from-violet-500 to-violet-700" },
@@ -33,7 +34,7 @@ export function AccentThemePicker({ initialTheme }: { initialTheme: AccentTheme 
     <section className="mt-6 rounded-2xl border bg-surface p-5">
       <h3 className="font-bold">Color de acento</h3>
       <p className="mt-1 text-sm text-muted">Personaliza botones, enlaces y elementos destacados en los modos claro y oscuro.</p>
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
         {options.map((option) => {
           const active = selected === option.id;
           return <button aria-pressed={active} className={`relative rounded-xl border p-3 text-left transition hover:-translate-y-0.5 ${active ? "ring-2 ring-brand ring-offset-2 ring-offset-surface" : ""}`} disabled={pending} key={option.id} onClick={() => choose(option.id)} type="button">
