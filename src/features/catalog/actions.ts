@@ -234,6 +234,7 @@ export async function createProduct(
   if (error || !data) return { error: error?.message ?? "No se pudo crear." };
   await audit({ action: "product.created", type: "product", id: data.id, businessId, actorId: profile.id, after: payload });
   revalidatePath("/products");
+  if (formData.get("stay_on_list") === "true") return { success: "Producto creado correctamente." };
   redirect(`/products/${data.id}`);
 }
 

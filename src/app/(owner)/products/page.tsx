@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { PackageOpen, Plus } from "lucide-react";
+import { PackageOpen } from "lucide-react";
 import { CsvDownloadButton } from "@/components/ui/csv-download-button";
-import { getBusinessFeatures, getProducts } from "@/features/catalog/data";
+import { getBusinessFeatures, getCategories, getProducts } from "@/features/catalog/data";
 import { ProductImportForm } from "@/features/catalog/product-import-form";
+import { ProductCreateDialog } from "@/features/catalog/product-create-dialog";
 import { formatMoney } from "@/lib/money";
 
 function stockLabel(stock: number, threshold: number) {
@@ -14,7 +15,7 @@ function stockLabel(stock: number, threshold: number) {
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ q?: string; stock?: string }> }) {
   const filters = await searchParams;
   const query = filters.q?.trim().toLowerCase() ?? "";
-  const [allProducts, features] = await Promise.all([getProducts(), getBusinessFeatures()]);
+  const [allProducts, features, categories] = await Promise.all([getProducts(), getBusinessFeatures(), getCategories()]);
   const products = allProducts.filter((product) => {
     const matchesQuery = !query || product.name.toLowerCase().includes(query) || product.sku?.toLowerCase().includes(query);
     const matchesStock = !features.use_stock || !filters.stock ||
@@ -36,7 +37,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         <div className="flex flex-wrap gap-2">
           <CsvDownloadButton filename="productos.csv" headers={["nombre", "sku", "categoria", "descripcion", "precio_costo", "precio_venta", "existencia", "minimo", "activo"]} rows={exportRows} />
           <CsvDownloadButton filename="plantilla-productos.csv" headers={["nombre", "sku", "categoria", "descripcion", "precio_costo", "precio_venta", "existencia", "minimo"]} rows={[["Producto ejemplo", "SKU-001", "", "", 10, 15, 20, 5]]} />
-          <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white" href="/products/new"><Plus className="size-4" /> Crear producto</Link>
+          <ProductCreateDialog categories={categories} useStock={features.use_stock} />
         </div>
       </div>
       <ProductImportForm />

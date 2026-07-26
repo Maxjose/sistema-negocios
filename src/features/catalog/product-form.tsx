@@ -12,11 +12,16 @@ import type { Category, Product } from "@/features/catalog/types";
 
 const initialState: CatalogState = {};
 
-export function ProductForm({ categories, product, useStock, useStockAdjustments = false }: { categories: Category[]; product?: Product; useStock: boolean; useStockAdjustments?: boolean }) {
+export function ProductForm({ categories, onSuccess, product, stayOnList = false, useStock, useStockAdjustments = false }: { categories: Category[]; onSuccess?: () => void; product?: Product; stayOnList?: boolean; useStock: boolean; useStockAdjustments?: boolean }) {
   const formAction = product ? updateProduct.bind(null, product.id) : createProduct;
-  const [state, action, pending] = useActionState(formAction, initialState);
+  const [state, action, pending] = useActionState(async (previous: CatalogState, formData: FormData) => {
+    const result = await formAction(previous, formData);
+    if (result.success) onSuccess?.();
+    return result;
+  }, initialState);
   return (
     <form action={action} className="space-y-6">
+      {stayOnList && <input name="stay_on_list" type="hidden" value="true" />}
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="sm:col-span-2"><span className="text-sm font-semibold">Nombre</span><input className="mt-2 h-11 w-full rounded-xl border bg-surface px-3" defaultValue={product?.name} name="name" required /></label>
         <label><span className="text-sm font-semibold">SKU opcional</span><input className="mt-2 h-11 w-full rounded-xl border bg-surface px-3" defaultValue={product?.sku ?? ""} name="sku" /></label>
