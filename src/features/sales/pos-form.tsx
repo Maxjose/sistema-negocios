@@ -214,7 +214,7 @@ export function PosForm({
         <label className="mt-5 block text-sm font-semibold">
           Método de pago
           <select
-            className="mt-2 h-11 w-full rounded-xl border px-3"
+            className="mt-2 h-11 w-full rounded-xl border bg-surface px-3 text-foreground"
             onChange={(event) =>
               setPayments((current) => [
                 { ...current[0], payment_method_id: event.target.value },
@@ -257,7 +257,7 @@ export function PosForm({
           return (
             <div className="mt-2 grid grid-cols-[1fr_7rem_auto] gap-2" key={index}>
               <select
-                className="h-11 rounded-xl border px-3"
+                className="h-11 rounded-xl border bg-surface px-3 text-foreground"
                 onChange={(event) =>
                   setPayments((current) =>
                     current.map((entry, position) =>

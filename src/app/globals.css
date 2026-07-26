@@ -88,6 +88,16 @@ textarea {
   font: inherit;
 }
 
+select {
+  background-color: var(--surface);
+  color: var(--foreground);
+}
+
+select option {
+  background-color: var(--surface);
+  color: var(--foreground);
+}
+
 button, a { -webkit-tap-highlight-color: transparent; }
 button:active, a:active { transform: scale(0.985); }
 
