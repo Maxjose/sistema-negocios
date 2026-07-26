@@ -12,9 +12,9 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
     <div>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div><p className="text-sm text-muted">Operaciones registradas</p><h2 className="mt-1 text-2xl font-bold">Ventas</h2></div>
-        <div className="flex flex-wrap gap-2">
-          <CsvDownloadButton filename="ventas.csv" headers={["venta", "fecha", "metodo_pago", "total", "costo", "ganancia", "estado"]} rows={sales.map((sale) => [sale.sale_number, sale.sold_at, sale.payment_method_name, Number(sale.total), Number(sale.total_cost), Number(sale.gross_profit), sale.status])} />
-          <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white" href="/sales/new"><Plus className="size-4" /> Registrar venta</Link>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          <CsvDownloadButton filename="ventas.csv" headers={["venta", "fecha", "metodo_pago", "total", "costo", "ganancia", "estado"]} label="Exportar" rows={sales.map((sale) => [sale.sale_number, sale.sold_at, sale.payment_method_name, Number(sale.total), Number(sale.total_cost), Number(sale.gross_profit), sale.status])} />
+          <Link className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-brand px-2 text-xs font-semibold text-white sm:min-h-11 sm:w-auto sm:gap-2 sm:px-4 sm:text-sm" href="/sales/new"><Plus className="size-4" /><span className="sm:hidden">Registrar</span><span className="hidden sm:inline">Registrar venta</span></Link>
         </div>
       </div>
       <form className="mt-6"><select className="h-11 rounded-xl border bg-surface px-3" defaultValue={filters.status ?? ""} name="status"><option value="">Todas</option><option value="completed">Completadas</option><option value="voided">Anuladas</option></select><button className="ml-2 h-11 rounded-xl border bg-surface px-4 text-sm font-semibold" type="submit">Filtrar</button></form>
