@@ -8,7 +8,7 @@ import type { Category } from "./types";
 export function ProductCreateDialog({ categories, useStock }: { categories: Category[]; useStock: boolean }) {
   const [open, setOpen] = useState(false);
   return <>
-    <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white" onClick={() => setOpen(true)} type="button"><Plus className="size-4" /> Crear producto</button>
+    <button className="col-span-3 inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-semibold text-white sm:col-span-1 sm:min-h-11 sm:w-auto sm:gap-2 sm:px-4 sm:text-sm" onClick={() => setOpen(true)} type="button"><Plus className="size-4" /> Crear producto</button>
     {open && <div aria-labelledby="create-product-title" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/55 p-4 backdrop-blur-sm" role="dialog">
       <button aria-label="Cerrar ventana" className="absolute inset-0 cursor-default" onClick={() => setOpen(false)} type="button" />
       <section className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-3xl overflow-y-auto overscroll-contain rounded-3xl border bg-surface p-5 shadow-2xl sm:p-7">

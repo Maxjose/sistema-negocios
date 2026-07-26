@@ -23,5 +23,5 @@ export function CsvDownloadButton({
     link.click();
     URL.revokeObjectURL(url);
   };
-  return <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-surface px-4 text-sm font-semibold" onClick={download} type="button"><Download className="size-4" /> {label}</button>;
+  return <button className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border bg-surface px-2 text-xs font-semibold transition hover:bg-accent sm:min-h-11 sm:w-auto sm:gap-2 sm:px-4 sm:text-sm" onClick={download} type="button"><Download className="size-4" /> {label}</button>;
 }
