@@ -42,7 +42,8 @@
 
 @media print {
   aside, nav, header, .print\:hidden { display: none !important; }
-  body { background: white !important; }
+  html, body, main { background: white !important; }
+  body { color: #111827 !important; }
   main { padding: 0 !important; }
   .receipt {
     margin: 0 !important;
@@ -53,6 +54,23 @@
     box-shadow: none !important;
   }
   .receipt .receipt-header { display: flex !important; }
+  .receipt .receipt-payment {
+    background: #f3f4f6 !important;
+    color: #111827 !important;
+  }
+  .receipt .receipt-thanks {
+    color: #4b5563 !important;
+  }
+  .receipt .text-muted {
+    color: #4b5563 !important;
+  }
+  .receipt td,
+  .receipt th,
+  .receipt p,
+  .receipt span,
+  .receipt h1 {
+    color: inherit;
+  }
   .receipt * { color-adjust: exact; print-color-adjust: exact; }
 }
 

@@ -111,12 +111,12 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             <div className="flex justify-between gap-6 border-t pt-3 text-lg font-bold"><span>Total</span><span>{money(Number(sale.total))}</span></div>
           </div>
 
-          <div className="mt-7 grid gap-4 rounded-xl bg-background p-4 sm:grid-cols-2">
+          <div className="receipt-payment mt-7 grid gap-4 rounded-xl bg-accent p-4 sm:grid-cols-2">
             <div><p className="text-xs font-semibold uppercase text-muted">Método de pago</p><p className="mt-1 font-semibold">{sale.payment_method_name}</p></div>
             {sale.sale_payments && sale.sale_payments.length > 1 && <div>{sale.sale_payments.map((payment) => <div className="flex justify-between gap-3 text-sm" key={payment.id}><span>{payment.payment_method_name}</span><strong>{money(Number(payment.amount))}</strong></div>)}</div>}
           </div>
           {sale.note && <div className="mt-5"><p className="text-xs font-semibold uppercase text-muted">Nota</p><p className="mt-1 text-sm">{sale.note}</p></div>}
-          <p className="mt-8 text-center text-sm text-muted">Gracias por su compra.</p>
+          <p className="receipt-thanks mt-8 text-center text-sm text-muted">Gracias por su compra.</p>
         </div>
       </article>
 
