@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { AppLaunchScreen } from "@/components/pwa/app-launch-screen";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -51,6 +52,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `try{const t=localStorage.getItem("theme");document.documentElement.classList.toggle("dark",t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))}catch{}` }} />
       </head>
       <body className="flex min-h-full flex-col">
+        <AppLaunchScreen />
         {children}
         <ServiceWorkerRegister />
       </body>
