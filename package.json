@@ -16,6 +16,7 @@
     "test:features": "node --env-file=.env scripts/verify-business-features.mjs",
     "test:sessions": "node --env-file=.env scripts/verify-session-revocation.mjs",
     "test:payments": "node --env-file=.env scripts/verify-mixed-payments.mjs",
+    "test:accent": "node --env-file=.env scripts/verify-accent-theme.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "test:watch": "vitest",
     "admin:create": "node --env-file=.env scripts/create-super-admin.mjs",

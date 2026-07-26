@@ -8,8 +8,9 @@ import { BrandMark } from "@/components/brand/brand-mark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { logout } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
+import type { AccentTheme } from "@/features/catalog/types";
 
-type AppShellProps = { children: React.ReactNode; role: "owner" | "admin"; title: string; userName: string };
+type AppShellProps = { accentTheme?: AccentTheme; children: React.ReactNode; role: "owner" | "admin"; title: string; userName: string };
 const ownerLinks = [
   { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
   { label: "Registrar venta", href: "/sales/new", icon: ShoppingCart },
@@ -56,6 +57,9 @@ function UserMenu({ role, userName }: { role: "owner" | "admin"; userName: strin
             <div className="min-w-0"><p className="truncate text-sm font-bold">{userName}</p><p className="text-xs text-muted">{roleLabel}</p></div>
           </div>
           <div className="flex items-center justify-between px-3 py-4 text-sm"><span className="text-muted">Plan</span><span className="rounded-full border bg-accent/60 px-3 py-1 text-xs font-semibold text-brand-strong">Básico</span></div>
+          <Link className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold text-foreground transition hover:bg-accent" href={role === "admin" ? "/admin/settings" : "/settings"} onClick={() => setOpen(false)} role="menuitem">
+            <Settings className="size-4 text-muted" /> Configuración
+          </Link>
           <form action={logout}><button className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30" role="menuitem" type="submit"><LogOut className="size-4" /> Cerrar sesión</button></form>
         </div>
       )}
@@ -63,12 +67,12 @@ function UserMenu({ role, userName }: { role: "owner" | "admin"; userName: strin
   );
 }
 
-export function AppShell({ children, role, title, userName }: AppShellProps) {
+export function AppShell({ accentTheme = "blue", children, role, title, userName }: AppShellProps) {
   const links = role === "admin" ? adminLinks : ownerLinks;
   const pathname = usePathname();
   const activeHref = links.filter(({ href }) => href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+    <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[17rem_1fr]" data-accent={accentTheme} data-app-shell>
       <aside className="hidden border-r bg-surface px-4 py-6 lg:flex lg:flex-col">
         <BrandMark className="px-2" />
         <nav aria-label="Navegación principal" className="mt-9 space-y-1">

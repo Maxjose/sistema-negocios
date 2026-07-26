@@ -7,11 +7,19 @@ import type {
   PaymentMethod,
   Product,
   BusinessFeatures,
+  AccentTheme,
 } from "@/features/catalog/types";
 
 async function ownerClient() {
   await requireRole("owner");
   return createClient();
+}
+
+export async function getBusinessAccent(): Promise<AccentTheme> {
+  const supabase = await ownerClient();
+  const { data, error } = await supabase.from("businesses").select("accent_theme").single();
+  if (error) throw new Error(error.message);
+  return data.accent_theme as AccentTheme;
 }
 
 export async function getCategories(): Promise<Category[]> {

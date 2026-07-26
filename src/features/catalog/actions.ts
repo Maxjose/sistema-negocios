@@ -7,8 +7,20 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import type { AccentTheme } from "@/features/catalog/types";
 
 export type CatalogState = { error?: string; success?: string };
+const accentSchema = z.enum(["emerald", "blue", "violet", "rose", "amber", "cyan"]);
+
+export async function setBusinessAccent(accent: AccentTheme) {
+  await requireRole("owner");
+  const parsed = accentSchema.safeParse(accent);
+  if (!parsed.success) throw new Error("Color de acento inválido.");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_business_accent", { p_accent_theme: parsed.data });
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}
 
 async function context() {
   const profile = await requireRole("owner");

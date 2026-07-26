@@ -19,6 +19,8 @@ export type BusinessFeatures = {
   allow_sale_notes: boolean;
 };
 
+export type AccentTheme = "emerald" | "blue" | "violet" | "rose" | "amber" | "cyan";
+
 export type Product = {
   id: string;
   name: string;
