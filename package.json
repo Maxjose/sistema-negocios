@@ -18,6 +18,7 @@
     "test:payments": "node --env-file=.env scripts/verify-mixed-payments.mjs",
     "test:accent": "node --env-file=.env scripts/verify-accent-theme.mjs",
     "test:plans": "node --env-file=.env scripts/verify-business-plans.mjs",
+    "test:maintenance": "node --env-file=.env scripts/verify-maintenance-mode.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "test:watch": "vitest",
     "admin:create": "node --env-file=.env scripts/create-super-admin.mjs",

@@ -61,6 +61,11 @@ export async function login(
     await supabase.auth.signOut();
     return { error: "Esta cuenta no está activa. Contacta al administrador." };
   }
+  const { data: maintenanceMode, error: maintenanceError } = await supabase.rpc("is_maintenance_mode");
+  if (maintenanceError || (profile.role === "owner" && maintenanceMode)) {
+    await supabase.auth.signOut();
+    return { error: maintenanceMode ? "El sistema está temporalmente en mantenimiento." : "No se pudo verificar el estado del sistema." };
+  }
 
   const { error: loginAuditError } = await supabase.rpc(
     "record_authenticated_login",

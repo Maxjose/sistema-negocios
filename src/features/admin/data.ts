@@ -170,3 +170,11 @@ export async function getAdminAlerts() {
     ownersWithoutRecentAccess: ownersWithoutRecentAccess ?? 0,
   };
 }
+
+export async function getPlatformSettings() {
+  await requireRole("super_admin");
+  const admin = createAdminClient();
+  const { data, error } = await admin.from("platform_settings").select("maintenance_mode, updated_at").eq("id", true).single();
+  if (error) throw new Error(`Unable to load platform settings: ${error.message}`);
+  return data;
+}

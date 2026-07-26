@@ -33,6 +33,7 @@ export function PosForm({
   const [payments, setPayments] = useState<Payment[]>([
     { payment_method_id: "", amount: 0 },
   ]);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const [state, action, pending] = useActionState(confirmSale, initialState);
   const visible = products.filter(
     (product) =>
@@ -133,13 +134,7 @@ export function PosForm({
           {cart.length > 0 && (
             <button
               className="min-h-9 rounded-lg px-2 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
-              onClick={() => {
-                if (window.confirm("¿Limpiar todos los productos del carrito?")) {
-                  setCart([]);
-                  setDiscount(0);
-                  setPayments([{ payment_method_id: "", amount: 0 }]);
-                }
-              }}
+              onClick={() => setShowClearDialog(true)}
               type="button"
             >
               Limpiar
@@ -352,6 +347,23 @@ export function PosForm({
           {pending ? "Confirmando..." : "Confirmar venta"}
         </Button>
       </aside>
+      {showClearDialog && (
+        <div aria-labelledby="clear-cart-title" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/55 p-4 backdrop-blur-sm" role="dialog">
+          <div className="w-full max-w-sm rounded-3xl border bg-surface p-6 shadow-2xl">
+            <h3 className="text-lg font-bold" id="clear-cart-title">¿Limpiar el carrito?</h3>
+            <p className="mt-2 text-sm leading-6 text-muted">Se eliminarán todos los productos, el descuento y los métodos de pago de esta venta.</p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button className="min-h-11 rounded-xl border bg-surface text-sm font-semibold" onClick={() => setShowClearDialog(false)} type="button">Cancelar</button>
+              <button className="min-h-11 rounded-xl bg-red-700 text-sm font-semibold text-white hover:bg-red-800" onClick={() => {
+                setCart([]);
+                setDiscount(0);
+                setPayments([{ payment_method_id: "", amount: 0 }]);
+                setShowClearDialog(false);
+              }} type="button">Limpiar carrito</button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

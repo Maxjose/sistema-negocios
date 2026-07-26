@@ -13,6 +13,18 @@ export type AdminActionState = {
   success?: string;
 };
 
+export async function updateMaintenanceMode(_state: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const actor = await requireRole("super_admin");
+  const enabled = formData.get("maintenance_mode") === "on";
+  const admin = createAdminClient();
+  const { data: before } = await admin.from("platform_settings").select("maintenance_mode").eq("id", true).single();
+  const { error } = await admin.from("platform_settings").update({ maintenance_mode: enabled, updated_at: new Date().toISOString(), updated_by: actor.id }).eq("id", true);
+  if (error) return { error: error.message };
+  await audit({ action: "platform.maintenance_updated", entityType: "platform", entityId: "maintenance", before, after: { maintenance_mode: enabled } });
+  revalidatePath("/admin/settings");
+  return { success: enabled ? "Modo mantenimiento activado." : "Modo mantenimiento desactivado." };
+}
+
 const optionalText = z.string().trim().max(250).optional();
 
 const businessSchema = z.object({

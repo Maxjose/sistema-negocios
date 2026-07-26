@@ -15,6 +15,7 @@ export type CurrentProfile = {
   plan_tier: "free" | "basic" | "premium" | "unlimited" | null;
   plan_expires_at: string | null;
   business_name: string | null;
+  maintenance_mode: boolean;
 };
 
 export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> => {
@@ -43,12 +44,15 @@ export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> 
   if (error || !data || data.status !== "active" || !businessIsAllowed) {
     return null;
   }
+  const { data: maintenanceMode, error: maintenanceError } = await supabase.rpc("is_maintenance_mode");
+  if (maintenanceError) return null;
 
   return {
     ...data,
     plan_tier: data.role === "owner" ? business?.plan_tier ?? "free" : null,
     plan_expires_at: data.role === "owner" ? business?.plan_expires_at ?? null : null,
     business_name: data.role === "owner" ? business?.name ?? "Mi negocio" : null,
+    maintenance_mode: Boolean(maintenanceMode),
   } as unknown as CurrentProfile;
 });
 
@@ -71,6 +75,7 @@ export async function requireRole(role: UserRole) {
   if (role === "owner" && profile.plan_expires_at && new Date(profile.plan_expires_at) <= new Date()) {
     redirect("/plan-expired");
   }
+  if (role === "owner" && profile.maintenance_mode) redirect("/maintenance");
 
   return profile;
 }
