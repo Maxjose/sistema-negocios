@@ -94,9 +94,16 @@ button:active, a:active { transform: scale(0.985); }
 }
 
 .animate-launch-progress {
-  animation: launch-progress 0.8s ease-in-out infinite;
+  animation: launch-progress 0.9s ease-in-out infinite;
 }
 
 .animate-launch-fade {
-  animation: launch-fade 0.7s ease-out forwards;
+  animation: launch-fade 1.7s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-launch-progress,
+  .animate-launch-fade {
+    animation: none;
+  }
 }
