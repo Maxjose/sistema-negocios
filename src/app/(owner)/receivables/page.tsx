@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CircleDollarSign, MessageCircle } from "lucide-react";
+import { getBusinessCurrency } from "@/features/catalog/data";
 import { getCustomers, getReceivables } from "@/features/customers/data";
 import { ReceivableForm } from "@/features/customers/receivable-forms";
 import { debtWhatsappUrl } from "@/features/customers/whatsapp";
@@ -7,7 +8,7 @@ import { debtWhatsappUrl } from "@/features/customers/whatsapp";
 const money = new Intl.NumberFormat("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default async function ReceivablesPage() {
-  const [customers, receivables] = await Promise.all([getCustomers(), getReceivables()]);
+  const [customers, receivables, currency] = await Promise.all([getCustomers(), getReceivables(), getBusinessCurrency()]);
   const open = receivables.filter((item) => item.status === "open");
   const today = new Date().toISOString().slice(0, 10);
   const balance = open.reduce((sum, item) => sum + Number(item.balance), 0);
@@ -22,7 +23,7 @@ export default async function ReceivablesPage() {
           <div className="divide-y">{receivables.map((item) => {
             const isOverdue = item.status === "open" && item.due_date < today;
             const canMessage = item.status === "open" && item.customers?.phone;
-            const whatsappUrl = canMessage ? debtWhatsappUrl({ balance: Number(item.balance), customerName: item.customers!.name, description: item.description, dueDate: item.due_date, phone: item.customers!.phone! }) : null;
+            const whatsappUrl = canMessage ? debtWhatsappUrl({ balance: Number(item.balance), currency, customerName: item.customers!.name, description: item.description, dueDate: item.due_date, phone: item.customers!.phone! }) : null;
             return <article className="flex flex-wrap items-center justify-between gap-4 px-5 py-4" key={item.id}>
               <Link className="min-w-0 flex-1 rounded-xl transition hover:text-brand" href={`/receivables/${item.id}`}><p className="font-semibold">{item.customers?.name}</p><p className="text-sm text-muted">{item.description} · vence {new Intl.DateTimeFormat("es-VE").format(new Date(`${item.due_date}T12:00:00`))}</p></Link>
               <div className="flex items-center gap-3"><div className="text-right"><p className="font-bold">{money.format(Number(item.balance))}</p><span className={`text-xs font-semibold ${isOverdue ? "text-red-600" : item.status === "paid" ? "text-emerald-600" : "text-amber-600"}`}>{isOverdue ? "Vencida" : item.status === "paid" ? "Pagada" : "Pendiente"}</span></div>{whatsappUrl && <a aria-label={`Enviar recordatorio a ${item.customers?.name}`} className="grid size-10 place-items-center rounded-xl bg-[#25D366]/15 text-[#128C4A] transition hover:bg-[#25D366]/25 dark:text-[#5ee58d]" href={whatsappUrl} rel="noreferrer" target="_blank" title="Enviar recordatorio por WhatsApp"><MessageCircle className="size-5" /></a>}</div>

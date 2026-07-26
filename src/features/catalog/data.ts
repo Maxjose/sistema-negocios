@@ -22,6 +22,13 @@ export async function getBusinessAccent(): Promise<AccentTheme> {
   return data.accent_theme as AccentTheme;
 }
 
+export async function getBusinessCurrency(): Promise<string> {
+  const supabase = await ownerClient();
+  const { data, error } = await supabase.from("businesses").select("currency_code").single();
+  if (error) throw new Error(error.message);
+  return data.currency_code;
+}
+
 export async function getCategories(): Promise<Category[]> {
   const supabase = await ownerClient();
   const { data, error } = await supabase
