@@ -5,10 +5,12 @@ import { Download } from "lucide-react";
 export function CsvDownloadButton({
   filename,
   headers,
+  label = "Exportar CSV",
   rows,
 }: {
   filename: string;
   headers: string[];
+  label?: string;
   rows: Array<Array<string | number | null>>;
 }) {
   const download = () => {
@@ -21,5 +23,5 @@ export function CsvDownloadButton({
     link.click();
     URL.revokeObjectURL(url);
   };
-  return <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-surface px-4 text-sm font-semibold" onClick={download} type="button"><Download className="size-4" /> Exportar CSV</button>;
+  return <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-surface px-4 text-sm font-semibold" onClick={download} type="button"><Download className="size-4" /> {label}</button>;
 }

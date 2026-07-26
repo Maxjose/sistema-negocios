@@ -35,8 +35,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div><p className="text-sm text-muted">{features.use_stock ? "Catálogo e inventario actual" : "Catálogo de productos"}</p><h2 className="mt-1 text-2xl font-bold">Productos</h2></div>
         <div className="flex flex-wrap gap-2">
-          <CsvDownloadButton filename="productos.csv" headers={["nombre", "sku", "categoria", "descripcion", "precio_costo", "precio_venta", "existencia", "minimo", "activo"]} rows={exportRows} />
-          <CsvDownloadButton filename="plantilla-productos.csv" headers={["nombre", "sku", "categoria", "descripcion", "precio_costo", "precio_venta", "existencia", "minimo"]} rows={[["Producto ejemplo", "SKU-001", "", "", 10, 15, 20, 5]]} />
+          <CsvDownloadButton filename="productos.csv" headers={["nombre", "sku", "categoria", "descripcion", "precio_costo", "precio_venta", "existencia", "minimo", "activo"]} label="Exportar productos" rows={exportRows} />
+          <CsvDownloadButton filename="plantilla-productos.csv" headers={["nombre", "sku", "categoria", "descripcion", "precio_costo", "precio_venta", "existencia", "minimo"]} label="Descargar plantilla" rows={[["Producto ejemplo", "SKU-001", "", "", 10, 15, 20, 5]]} />
           <ProductCreateDialog categories={categories} useStock={features.use_stock} />
         </div>
       </div>
