@@ -3,7 +3,7 @@
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, Grid2X2, LayoutDashboard, LogOut, ReceiptText, Settings, ShoppingCart, Store, UserCircle, UserRound, Users, X } from "lucide-react";
+import { Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, Grid2X2, LayoutDashboard, LogOut, PanelLeftClose, PanelLeftOpen, ReceiptText, Settings, ShoppingCart, Store, UserCircle, UserRound, Users, X } from "lucide-react";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { logout } from "@/features/auth/actions";
@@ -80,6 +80,7 @@ function UserMenu({ planDaysRemaining = null, planTier = "unlimited", role, user
 
 export function AppShell({ accentTheme = "blue", children, enableCredits = false, enableCustomers = false, planDaysRemaining, planTier, role, title, userName }: AppShellProps) {
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const links = role === "admin" ? adminLinks : [
     ...ownerLinks.slice(0, 4),
     ...(enableCustomers ? [{ label: "Clientes", href: "/customers", icon: UserRound }] : []),
@@ -92,12 +93,13 @@ export function AppShell({ accentTheme = "blue", children, enableCredits = false
   const mobileMoreLinks = role === "owner" ? links.slice(4) : [];
   const mobileMoreActive = mobileMoreLinks.some(({ href }) => href === activeHref);
   return (
-    <div className="h-dvh overflow-hidden bg-background text-foreground lg:grid lg:grid-cols-[17rem_1fr]" data-accent={accentTheme} data-app-shell>
-      <aside className="hidden h-dvh overflow-y-auto overscroll-contain border-r bg-surface px-4 py-6 lg:flex lg:flex-col">
-        <BrandMark className="px-2" />
+    <div className={cn("h-dvh overflow-hidden bg-background text-foreground transition-[grid-template-columns] duration-300 lg:grid", sidebarCollapsed ? "lg:grid-cols-[4.75rem_1fr]" : "lg:grid-cols-[17rem_1fr]")} data-accent={accentTheme} data-app-shell>
+      <aside className={cn("hidden h-dvh overflow-y-auto overscroll-contain border-r bg-surface py-6 transition-[padding] duration-300 lg:flex lg:flex-col", sidebarCollapsed ? "px-2" : "px-4")}>
+        <BrandMark className={sidebarCollapsed ? "justify-center" : "px-2"} compact={sidebarCollapsed} />
         <nav aria-label="Navegación principal" className="mt-9 space-y-1">
-          {links.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition hover:bg-accent hover:text-brand-strong", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href}><Icon aria-hidden="true" className="size-[1.125rem]" />{label}<LinkPendingIndicator /></Link>)}
+          {links.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-11 items-center rounded-xl text-sm font-medium text-muted transition hover:bg-accent hover:text-brand-strong", sidebarCollapsed ? "justify-center px-2" : "gap-3 px-3", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} title={sidebarCollapsed ? label : undefined}><Icon aria-hidden="true" className="size-[1.125rem] shrink-0" />{!sidebarCollapsed && <>{label}<LinkPendingIndicator /></>}</Link>)}
         </nav>
+        <button aria-label={sidebarCollapsed ? "Expandir menú lateral" : "Contraer menú lateral"} className={cn("mt-auto flex min-h-11 items-center rounded-xl text-sm font-semibold text-muted transition hover:bg-accent hover:text-brand-strong", sidebarCollapsed ? "justify-center px-2" : "gap-3 px-3")} onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} title={sidebarCollapsed ? "Expandir menú" : undefined} type="button">{sidebarCollapsed ? <PanelLeftOpen className="size-5" /> : <><PanelLeftClose className="size-5" /><span>Contraer menú</span></>}</button>
       </aside>
       <div className="flex h-dvh min-w-0 flex-col overflow-hidden">
         <header className="z-10 flex h-16 shrink-0 items-center justify-between border-b bg-surface/95 px-4 backdrop-blur sm:px-6 lg:px-8">
