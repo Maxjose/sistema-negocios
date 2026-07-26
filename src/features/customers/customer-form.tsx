@@ -8,8 +8,12 @@ import type { Customer } from "./types";
 const fieldClass = "min-h-11 w-full rounded-xl border bg-surface px-3 text-foreground outline-none transition placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/20";
 const buttonClass = "min-h-11 rounded-xl bg-brand px-4 text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60";
 
-export function CustomerForm() {
-  const [state, action, pending] = useActionState(createCustomer, {});
+export function CustomerForm({ onSuccess }: { onSuccess?: () => void }) {
+  const [state, action, pending] = useActionState(async (previous: Awaited<ReturnType<typeof createCustomer>>, formData: FormData) => {
+    const result = await createCustomer(previous, formData);
+    if (result.success) onSuccess?.();
+    return result;
+  }, {});
   return <form action={action} className="grid gap-4 sm:grid-cols-2">
     <label className="grid gap-1.5 text-sm font-semibold sm:col-span-2">Nombre<input className={fieldClass} name="name" required /></label>
     <label className="grid gap-1.5 text-sm font-semibold">Teléfono<input className={fieldClass} name="phone" /></label>
