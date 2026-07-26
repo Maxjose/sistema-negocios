@@ -67,7 +67,7 @@ export async function createCategory(
   const { profile, businessId, supabase } = await context();
   const parsed = settingSchema.safeParse({
     name: formData.get("name"),
-    description: formData.get("description"),
+    description: String(formData.get("description") ?? ""),
     display_order: formData.get("display_order") || 0,
   });
   if (!parsed.success) return { error: "Revisa los datos de la categoría." };

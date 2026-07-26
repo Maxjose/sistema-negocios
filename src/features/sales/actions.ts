@@ -45,7 +45,7 @@ export async function confirmSale(_state: SaleState, formData: FormData): Promis
   }
   const request = parsed.data.sale_type === "credit"
     ? supabase.rpc("confirm_credit_sale", { p_items: parsed.data.items, p_customer_id: parsed.data.customer_id, p_due_date: parsed.data.due_date, p_discount: parsed.data.discount, p_note: parsed.data.note })
-    : supabase.rpc("confirm_sale_v2", { p_items: parsed.data.items, p_payments: parsed.data.payments, p_discount: parsed.data.discount, p_note: parsed.data.note });
+    : supabase.rpc("confirm_sale_v3", { p_items: parsed.data.items, p_payments: parsed.data.payments, p_customer_id: parsed.data.customer_id || null, p_discount: parsed.data.discount, p_note: parsed.data.note });
   const { data, error } = await request;
   if (error) {
     if (error.message.includes("INSUFFICIENT_STOCK")) return { error: "La existencia cambió. Revisa las cantidades." };

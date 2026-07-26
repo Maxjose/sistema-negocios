@@ -209,7 +209,7 @@ export function PosForm({
         )}
         <input name="sale_type" type="hidden" value={saleType} />
         {saleType === "credit" && <div className="mt-4 grid gap-3"><label className="grid gap-1.5 text-sm font-semibold">Cliente<select className="h-11 rounded-xl border px-3" name="customer_id" required><option value="">Selecciona</option>{customers.filter((customer) => customer.is_active).map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}</select></label><label className="grid gap-1.5 text-sm font-semibold">Fecha de vencimiento<input className="h-11 rounded-xl border px-3" min={new Date().toISOString().slice(0, 10)} name="due_date" required type="date" /></label></div>}
-        {saleType === "cash" && <><input name="customer_id" type="hidden" value="" /><input name="due_date" type="hidden" value="" /></>}
+        {saleType === "cash" && <>{features.enable_customers ? <label className="mt-4 grid gap-1.5 text-sm font-semibold">Cliente <span className="font-normal text-muted">(opcional)</span><select className="h-11 rounded-xl border bg-surface px-3 text-foreground" name="customer_id"><option value="">Venta sin cliente</option>{customers.filter((customer) => customer.is_active).map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}</select></label> : <input name="customer_id" type="hidden" value="" />}<input name="due_date" type="hidden" value="" /></>}
         {saleType === "cash" && <>
         <label className="mt-5 block text-sm font-semibold">
           Método de pago
