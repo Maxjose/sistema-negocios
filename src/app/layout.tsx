@@ -6,16 +6,16 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Sistema Negocios",
-    template: "%s | Sistema Negocios",
+    default: "Monii App",
+    template: "%s | Monii App",
   },
   description:
     "Control de ventas, productos, inventario y ganancias para pequeños negocios.",
-  applicationName: "Sistema Negocios",
+  applicationName: "Monii App",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Sistema Negocios",
+    title: "Monii App",
   },
   formatDetection: {
     telephone: false,

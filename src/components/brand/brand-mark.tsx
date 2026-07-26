@@ -15,7 +15,7 @@ export function BrandMark({ compact = false, className }: BrandMarkProps) {
       </span>
       {!compact && (
         <span className="text-lg font-bold tracking-[-0.02em]">
-          Sistema Negocios
+          Monii App
         </span>
       )}
     </div>

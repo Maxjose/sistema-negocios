@@ -11,7 +11,7 @@ export function AppLaunchScreen() {
   }, []);
   if (!visible) return null;
   return (
-    <div aria-label="Cargando Sistema Negocios" aria-live="polite" className="animate-launch-fade fixed inset-0 z-[100] grid place-items-center bg-background text-foreground">
+    <div aria-label="Cargando Monii App" aria-live="polite" className="animate-launch-fade fixed inset-0 z-[100] grid place-items-center bg-background text-foreground">
       <div className="flex flex-col items-center">
         <BrandMark />
         <div className="mt-7 h-1 w-32 overflow-hidden rounded-full bg-accent">

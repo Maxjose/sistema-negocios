@@ -1,4 +1,4 @@
-# Sistema Negocios
+# Monii App
 
 Aplicación web multiempresa para gestionar productos, inventario simple, ventas
 y ganancias de pequeños negocios.

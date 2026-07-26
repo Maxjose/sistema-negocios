@@ -1,4 +1,4 @@
-const CACHE_NAME = "sistema-negocios-v1";
+const CACHE_NAME = "monii-app-v1";
 const OFFLINE_URL = "/offline.html";
 const STATIC_ASSETS = [
   OFFLINE_URL,

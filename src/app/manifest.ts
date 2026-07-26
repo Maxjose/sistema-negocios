@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Sistema Negocios",
-    short_name: "Negocios",
+    name: "Monii App",
+    short_name: "Monii",
     description:
       "Control de ventas, productos, inventario y ganancias para pequeños negocios.",
     start_url: "/login",
