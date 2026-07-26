@@ -2,6 +2,7 @@ export type Sale = {
   id: string;
   sale_number: number;
   sold_at: string;
+  subtotal: number;
   total: number;
   total_cost: number;
   gross_profit: number;
@@ -9,10 +10,22 @@ export type Sale = {
   payment_method_name: string;
   status: "completed" | "voided";
   note: string | null;
+  customer_name: string | null;
+  customers: { phone: string | null } | null;
   void_reason: string | null;
   voided_at: string | null;
   sale_items?: SaleItem[];
   sale_payments?: SalePayment[];
+};
+
+export type ReceiptBusiness = {
+  name: string;
+  logo_url: string | null;
+  currency_code: string;
+  timezone: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  address: string | null;
 };
 
 export type SalePayment = {

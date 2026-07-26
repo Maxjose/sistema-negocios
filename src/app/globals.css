@@ -44,6 +44,16 @@
   aside, nav, header, .print\:hidden { display: none !important; }
   body { background: white !important; }
   main { padding: 0 !important; }
+  .receipt {
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: white !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+  .receipt .receipt-header { display: flex !important; }
+  .receipt * { color-adjust: exact; print-color-adjust: exact; }
 }
 
 @theme inline {
