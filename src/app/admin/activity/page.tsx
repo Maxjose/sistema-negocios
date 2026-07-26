@@ -1,4 +1,6 @@
 import { z } from "zod";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import {
   auditActionLabels,
@@ -6,7 +8,7 @@ import {
 } from "@/features/admin/audit-labels";
 import {
   getAuditActors,
-  getAuditLogs,
+  getAuditLogPage,
   getBusinesses,
 } from "@/features/admin/data";
 
@@ -16,6 +18,7 @@ const filtersSchema = z.object({
   action: z.string().trim().max(100).optional(),
   from: z.union([z.literal(""), z.iso.date()]).optional(),
   to: z.union([z.literal(""), z.iso.date()]).optional(),
+  page: z.coerce.number().int().min(1).max(10000).default(1),
 });
 
 export default async function ActivityPage({
@@ -24,9 +27,11 @@ export default async function ActivityPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const parsed = filtersSchema.safeParse(await searchParams);
-  const filters = parsed.success ? parsed.data : {};
-  const [entries, businesses, actors] = await Promise.all([
-    getAuditLogs(200, {
+  const filters: z.infer<typeof filtersSchema> = parsed.success ? parsed.data : { page: 1 };
+  const page = filters.page ?? 1;
+  const pageSize = 25;
+  const [activity, businesses, actors] = await Promise.all([
+    getAuditLogPage(page, pageSize, {
       businessId: filters.business || undefined,
       actorId: filters.actor || undefined,
       action: filters.action || undefined,
@@ -36,6 +41,18 @@ export default async function ActivityPage({
     getBusinesses(),
     getAuditActors(),
   ]);
+  const entries = activity.entries;
+  const totalPages = Math.max(1, Math.ceil(activity.total / pageSize));
+  const pageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    if (filters.business) params.set("business", filters.business);
+    if (filters.actor) params.set("actor", filters.actor);
+    if (filters.action) params.set("action", filters.action);
+    if (filters.from) params.set("from", filters.from);
+    if (filters.to) params.set("to", filters.to);
+    params.set("page", String(targetPage));
+    return `/admin/activity?${params.toString()}`;
+  };
 
   return (
     <div>
@@ -79,6 +96,13 @@ export default async function ActivityPage({
           </ul>
         )}
       </div>
+      {activity.total > 0 && <nav aria-label="Paginación de actividad" className="mt-4 flex flex-col items-center justify-between gap-3 rounded-2xl border bg-surface px-4 py-3 sm:flex-row">
+        <p className="text-xs text-muted">Página <strong className="text-foreground">{Math.min(page, totalPages)}</strong> de <strong className="text-foreground">{totalPages}</strong> · {activity.total} registros</p>
+        <div className="grid grid-cols-2 gap-2">
+          {page > 1 ? <Link className="inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border px-3 text-sm font-semibold hover:bg-accent" href={pageHref(page - 1)}><ChevronLeft className="size-4" /> Anterior</Link> : <span className="inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border px-3 text-sm font-semibold text-muted opacity-50"><ChevronLeft className="size-4" /> Anterior</span>}
+          {page < totalPages ? <Link className="inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border px-3 text-sm font-semibold hover:bg-accent" href={pageHref(page + 1)}>Siguiente <ChevronRight className="size-4" /></Link> : <span className="inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border px-3 text-sm font-semibold text-muted opacity-50">Siguiente <ChevronRight className="size-4" /></span>}
+        </div>
+      </nav>}
     </div>
   );
 }

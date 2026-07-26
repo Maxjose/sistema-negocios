@@ -110,6 +110,36 @@ export async function getAuditLogs(
   return data as unknown as AuditLog[];
 }
 
+export async function getAuditLogPage(
+  page: number,
+  pageSize: number,
+  filters: AuditFilters = {},
+): Promise<{ entries: AuditLog[]; total: number }> {
+  await requireRole("super_admin");
+  const admin = createAdminClient();
+  const fromRow = (page - 1) * pageSize;
+  let query = admin
+    .from("audit_logs")
+    .select(
+      "id, action, entity_type, entity_id, created_at, business_id, actor_user_id, businesses(name), profiles(full_name)",
+      { count: "exact" },
+    )
+    .order("created_at", { ascending: false })
+    .range(fromRow, fromRow + pageSize - 1);
+  if (filters.businessId) query = query.eq("business_id", filters.businessId);
+  if (filters.actorId) query = query.eq("actor_user_id", filters.actorId);
+  if (filters.action) query = query.eq("action", filters.action);
+  if (filters.from) query = query.gte("created_at", `${filters.from}T00:00:00`);
+  if (filters.to) {
+    const until = new Date(`${filters.to}T00:00:00Z`);
+    until.setUTCDate(until.getUTCDate() + 1);
+    query = query.lt("created_at", until.toISOString());
+  }
+  const { data, count, error } = await query;
+  if (error) throw new Error(`Unable to load audit log page: ${error.message}`);
+  return { entries: data as unknown as AuditLog[], total: count ?? 0 };
+}
+
 export async function getAuditActors() {
   await requireRole("super_admin");
   const admin = createAdminClient();
