@@ -1,4 +1,4 @@
-const CACHE_NAME = "monii-app-v1";
+const CACHE_NAME = "monii-app-v2";
 const OFFLINE_URL = "/offline.html";
 const STATIC_ASSETS = [
   OFFLINE_URL,
@@ -28,6 +28,18 @@ self.addEventListener("activate", (event) => {
       ),
   );
   self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "REFRESH_APP_CACHE") return;
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+      .then(() => caches.open(CACHE_NAME))
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(() => event.ports[0]?.postMessage({ refreshed: true })),
+  );
 });
 
 self.addEventListener("fetch", (event) => {

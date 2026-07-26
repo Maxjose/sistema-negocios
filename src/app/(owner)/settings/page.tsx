@@ -3,6 +3,7 @@ import { CategoryCreateForm, PaymentCreateForm } from "@/features/catalog/settin
 import { SortableSettingsList } from "@/features/catalog/sortable-settings-list";
 import { AccountPasswordForm } from "@/features/auth/account-password-form";
 import { AccentThemePicker } from "@/features/catalog/accent-theme-picker";
+import { AppUpdateCard } from "@/components/pwa/app-update-card";
 
 export default async function SettingsPage() {
   const [categories, methods, accentTheme] = await Promise.all([getCategories(), getPaymentMethods(), getBusinessAccent()]);
@@ -13,5 +14,6 @@ export default async function SettingsPage() {
     </div>
     <AccentThemePicker initialTheme={accentTheme} />
     <section className="mt-6 max-w-xl rounded-2xl border bg-surface p-5"><h3 className="font-bold">Seguridad de la cuenta</h3><p className="mb-5 mt-1 text-sm text-muted">Cambia la contraseña utilizada para ingresar al sistema.</p><AccountPasswordForm /></section>
+    <AppUpdateCard />
   </div>;
 }
