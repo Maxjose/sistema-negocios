@@ -14,6 +14,7 @@ export type CurrentProfile = {
   must_change_password: boolean;
   plan_tier: "free" | "basic" | "premium" | "unlimited" | null;
   plan_expires_at: string | null;
+  business_name: string | null;
 };
 
 export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> => {
@@ -28,7 +29,7 @@ export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> 
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, business_id, full_name, role, status, must_change_password, businesses(status, plan_tier, plan_expires_at)",
+      "id, business_id, full_name, role, status, must_change_password, businesses(name, status, plan_tier, plan_expires_at)",
     )
     .eq("id", userId)
     .single();
@@ -47,6 +48,7 @@ export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> 
     ...data,
     plan_tier: data.role === "owner" ? business?.plan_tier ?? "free" : null,
     plan_expires_at: data.role === "owner" ? business?.plan_expires_at ?? null : null,
+    business_name: data.role === "owner" ? business?.name ?? "Mi negocio" : null,
   } as unknown as CurrentProfile;
 });
 

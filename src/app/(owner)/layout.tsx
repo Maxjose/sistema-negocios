@@ -12,7 +12,7 @@ export default async function OwnerLayout({
   const accentTheme = await getBusinessAccent();
 
   return (
-    <AppShell accentTheme={accentTheme} planExpiresAt={profile.plan_expires_at} planTier={profile.plan_tier ?? "free"} role="owner" title="Mi negocio" userName={profile.full_name}>
+    <AppShell accentTheme={accentTheme} planExpiresAt={profile.plan_expires_at} planTier={profile.plan_tier ?? "free"} role="owner" title={profile.business_name ?? "Mi negocio"} userName={profile.full_name}>
       {children}
     </AppShell>
   );
