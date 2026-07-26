@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { joinPhone, phoneCountries } from "./phone";
 
 export type CustomerState = { error?: string; success?: string };
 
@@ -27,7 +28,8 @@ async function audit(action: string, type: string, id: string, businessId: strin
 
 const customerSchema = z.object({
   name: z.string().trim().min(2).max(160),
-  phone: z.string().trim().max(40).optional(),
+  phone_country_code: z.enum(phoneCountries.map((country) => country.code) as [string, ...string[]]),
+  phone_number: z.string().trim().max(20).regex(/^[\d\s()-]*$/),
   email: z.union([z.literal(""), z.email()]).optional(),
   notes: z.string().trim().max(1000).optional(),
 });
@@ -36,7 +38,9 @@ export async function createCustomer(_state: CustomerState, formData: FormData):
   const parsed = customerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: "Revisa el nombre, teléfono y correo." };
   const { profile, businessId, supabase } = await context();
-  const payload = { ...parsed.data, phone: parsed.data.phone || null, email: parsed.data.email || null, notes: parsed.data.notes || null, business_id: businessId };
+  const phone = joinPhone(parsed.data.phone_country_code, parsed.data.phone_number);
+  if (phone && phone.replace(/\D/g, "").length < 7) return { error: "El número de teléfono es demasiado corto." };
+  const payload = { name: parsed.data.name, phone, email: parsed.data.email || null, notes: parsed.data.notes || null, business_id: businessId };
   const { data, error } = await supabase.from("customers").insert(payload).select("id").single();
   if (error || !data) return { error: error?.message ?? "No se pudo crear el cliente." };
   await audit("customer.created", "customer", data.id, businessId, profile.id, payload);
@@ -56,7 +60,9 @@ export async function updateCustomer(id: string, _state: CustomerState, formData
   const parsed = customerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: "Revisa el nombre, teléfono y correo." };
   const { profile, businessId, supabase } = await context();
-  const payload = { ...parsed.data, phone: parsed.data.phone || null, email: parsed.data.email || null, notes: parsed.data.notes || null, updated_at: new Date().toISOString() };
+  const phone = joinPhone(parsed.data.phone_country_code, parsed.data.phone_number);
+  if (phone && phone.replace(/\D/g, "").length < 7) return { error: "El número de teléfono es demasiado corto." };
+  const payload = { name: parsed.data.name, phone, email: parsed.data.email || null, notes: parsed.data.notes || null, updated_at: new Date().toISOString() };
   const { data, error } = await supabase.from("customers").update(payload).eq("id", id).select("id").maybeSingle();
   if (error || !data) return { error: error?.message ?? "El cliente no existe." };
   await audit("customer.updated", "customer", id, businessId, profile.id, payload);
