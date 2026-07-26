@@ -11,6 +11,7 @@ import type {
 } from "@/features/catalog/types";
 import { confirmSale, type SaleState } from "@/features/sales/actions";
 import { formatMoney } from "@/lib/money";
+import type { Customer } from "@/features/customers/types";
 
 type CartItem = { product: Product; quantity: number };
 type Payment = { payment_method_id: string; amount: number };
@@ -20,10 +21,12 @@ export function PosForm({
   products,
   methods,
   features,
+  customers,
 }: {
   products: Product[];
   methods: PaymentMethod[];
   features: BusinessFeatures;
+  customers: Customer[];
 }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [query, setQuery] = useState("");
@@ -34,6 +37,7 @@ export function PosForm({
     { payment_method_id: "", amount: 0 },
   ]);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [saleType, setSaleType] = useState<"cash" | "credit">("cash");
   const [state, action, pending] = useActionState(confirmSale, initialState);
   const visible = products.filter(
     (product) =>
@@ -197,6 +201,16 @@ export function PosForm({
             })),
           )}
         />
+        {features.enable_credits && (
+          <div className="mt-5 grid grid-cols-2 rounded-xl bg-background p-1">
+            <button className={`min-h-10 rounded-lg text-sm font-semibold ${saleType === "cash" ? "bg-surface shadow-sm" : "text-muted"}`} onClick={() => setSaleType("cash")} type="button">Contado</button>
+            <button className={`min-h-10 rounded-lg text-sm font-semibold ${saleType === "credit" ? "bg-surface shadow-sm" : "text-muted"}`} onClick={() => setSaleType("credit")} type="button">Crédito</button>
+          </div>
+        )}
+        <input name="sale_type" type="hidden" value={saleType} />
+        {saleType === "credit" && <div className="mt-4 grid gap-3"><label className="grid gap-1.5 text-sm font-semibold">Cliente<select className="h-11 rounded-xl border px-3" name="customer_id" required><option value="">Selecciona</option>{customers.filter((customer) => customer.is_active).map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}</select></label><label className="grid gap-1.5 text-sm font-semibold">Fecha de vencimiento<input className="h-11 rounded-xl border px-3" min={new Date().toISOString().slice(0, 10)} name="due_date" required type="date" /></label></div>}
+        {saleType === "cash" && <><input name="customer_id" type="hidden" value="" /><input name="due_date" type="hidden" value="" /></>}
+        {saleType === "cash" && <>
         <label className="mt-5 block text-sm font-semibold">
           Método de pago
           <select
@@ -279,6 +293,7 @@ export function PosForm({
             })),
           )}
         />
+        </>}
         {features.allow_discounts ? (
           <label className="mt-4 block text-sm font-semibold">
             Descuento
@@ -337,9 +352,9 @@ export function PosForm({
             pending ||
             cart.length === 0 ||
             discount > subtotal ||
-            !payments[0]?.payment_method_id ||
-            payments.some((payment) => !payment.payment_method_id) ||
-            (payments.length > 1 &&
+            (saleType === "cash" && !payments[0]?.payment_method_id) ||
+            (saleType === "cash" && payments.some((payment) => !payment.payment_method_id)) ||
+            (saleType === "cash" && payments.length > 1 &&
               Math.abs(total - paymentTotal) >= 0.005)
           }
           type="submit"

@@ -56,6 +56,9 @@ const businessFeaturesSchema = z.object({
   use_stock: z.boolean(),
   allow_discounts: z.boolean(),
   allow_sale_notes: z.boolean(),
+  enable_customers: z.boolean(),
+  enable_credits: z.boolean(),
+  enable_stock_adjustments: z.boolean(),
 });
 const planSchema = z.enum(["free", "basic", "premium", "unlimited"]);
 
@@ -216,13 +219,22 @@ export async function updateBusinessFeatures(
     use_stock: formData.get("use_stock") === "on",
     allow_discounts: formData.get("allow_discounts") === "on",
     allow_sale_notes: formData.get("allow_sale_notes") === "on",
+    enable_customers: formData.get("enable_customers") === "on",
+    enable_credits: formData.get("enable_credits") === "on",
+    enable_stock_adjustments: formData.get("enable_stock_adjustments") === "on",
   });
   if (!parsed.success) return { error: "No se pudo validar la configuración." };
+  if (parsed.data.enable_credits && !parsed.data.enable_customers) {
+    return { error: "Para activar créditos también debes activar el sistema de clientes." };
+  }
+  if (parsed.data.enable_stock_adjustments && !parsed.data.use_stock) {
+    return { error: "Los ajustes de inventario requieren que el uso de stock esté activo." };
+  }
 
   const admin = createAdminClient();
   const { data: before } = await admin
     .from("businesses")
-    .select("use_stock, allow_discounts, allow_sale_notes")
+    .select("use_stock, allow_discounts, allow_sale_notes, enable_customers, enable_credits, enable_stock_adjustments")
     .eq("id", id)
     .single();
   if (!before) return { error: "El negocio no existe." };

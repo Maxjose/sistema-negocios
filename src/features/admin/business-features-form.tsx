@@ -28,6 +28,21 @@ const options = [
     title: "Permitir notas en ventas",
     description: "Permite agregar observaciones opcionales a cada venta.",
   },
+  {
+    name: "enable_customers",
+    title: "Sistema de clientes",
+    description: "Permite registrar clientes y consultar su información.",
+  },
+  {
+    name: "enable_credits",
+    title: "Sistema de créditos",
+    description: "Habilita deudas, vencimientos, abonos y cuentas por cobrar. Requiere clientes.",
+  },
+  {
+    name: "enable_stock_adjustments",
+    title: "Ajustes de inventario",
+    description: "Permite corregir existencias indicando un motivo y conserva el historial.",
+  },
 ] as const;
 
 export function BusinessFeaturesForm({ business }: { business: Business }) {

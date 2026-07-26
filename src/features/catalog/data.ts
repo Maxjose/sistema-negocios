@@ -48,7 +48,7 @@ export async function getBusinessFeatures(): Promise<BusinessFeatures> {
   const supabase = await ownerClient();
   const { data, error } = await supabase
     .from("businesses")
-    .select("use_stock, allow_discounts, allow_sale_notes")
+    .select("use_stock, allow_discounts, allow_sale_notes, enable_customers, enable_credits, enable_stock_adjustments")
     .single();
   if (error) throw new Error(error.message);
   return data as BusinessFeatures;
@@ -69,4 +69,16 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProduct(id: string): Promise<Product | null> {
   const products = await getProducts();
   return products.find((product) => product.id === id) ?? null;
+}
+
+export async function getInventoryAdjustments(productId: string) {
+  const supabase = await ownerClient();
+  const { data, error } = await supabase
+    .from("inventory_adjustments")
+    .select("id, previous_quantity, new_quantity, difference, reason, created_at")
+    .eq("product_id", productId)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  if (error) throw new Error(error.message);
+  return data;
 }

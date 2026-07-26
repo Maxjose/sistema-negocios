@@ -218,13 +218,34 @@ export async function updateProduct(
   if (!parsed.success) return { error: "Revisa precios, cantidades y campos obligatorios." };
   const { data: before } = await supabase.from("products").select().eq("id", id).single();
   if (!before) return { error: "El producto no existe." };
-  const payload = { ...parsed.data, category_id: parsed.data.category_id || null, sku: parsed.data.sku || null, description: parsed.data.description || null };
+  const { data: business } = await supabase.from("businesses").select("enable_stock_adjustments").eq("id", businessId).single();
+  const payload = { ...parsed.data, stock_quantity: business?.enable_stock_adjustments ? before.stock_quantity : parsed.data.stock_quantity, category_id: parsed.data.category_id || null, sku: parsed.data.sku || null, description: parsed.data.description || null };
   const { error } = await supabase.from("products").update(payload).eq("id", id);
   if (error) return { error: error.message };
   await audit({ action: before.stock_quantity !== payload.stock_quantity ? "product.stock_updated" : "product.updated", type: "product", id, businessId, actorId: profile.id, before, after: payload });
   revalidatePath("/products");
   revalidatePath(`/products/${id}`);
   return { success: "Producto actualizado." };
+}
+
+const adjustmentSchema = z.object({
+  new_quantity: z.coerce.number().int().min(0),
+  reason: z.string().trim().min(3).max(250),
+});
+
+export async function adjustProductStock(id: string, _state: CatalogState, formData: FormData): Promise<CatalogState> {
+  const parsed = adjustmentSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Indica la nueva cantidad y un motivo." };
+  const { supabase } = await context();
+  const { error } = await supabase.rpc("adjust_product_stock", {
+    p_product_id: id,
+    p_new_quantity: parsed.data.new_quantity,
+    p_reason: parsed.data.reason,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/products");
+  revalidatePath(`/products/${id}`);
+  return { success: "Existencia ajustada correctamente." };
 }
 
 export async function uploadProductImage(

@@ -17,6 +17,9 @@ export type BusinessFeatures = {
   use_stock: boolean;
   allow_discounts: boolean;
   allow_sale_notes: boolean;
+  enable_customers: boolean;
+  enable_credits: boolean;
+  enable_stock_adjustments: boolean;
 };
 
 export type AccentTheme = "emerald" | "blue" | "violet" | "rose" | "amber" | "cyan";

@@ -3,14 +3,14 @@
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Boxes, ChartNoAxesCombined, ChevronDown, LayoutDashboard, LogOut, ReceiptText, Settings, ShoppingCart, Store, UserCircle, Users } from "lucide-react";
+import { Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, LayoutDashboard, LogOut, ReceiptText, Settings, ShoppingCart, Store, UserCircle, UserRound, Users } from "lucide-react";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { logout } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
 import type { AccentTheme } from "@/features/catalog/types";
 
-type AppShellProps = { accentTheme?: AccentTheme; children: React.ReactNode; planExpiresAt?: string | null; planTier?: "free" | "basic" | "premium" | "unlimited"; role: "owner" | "admin"; title: string; userName: string };
+type AppShellProps = { accentTheme?: AccentTheme; children: React.ReactNode; enableCredits?: boolean; enableCustomers?: boolean; planExpiresAt?: string | null; planTier?: "free" | "basic" | "premium" | "unlimited"; role: "owner" | "admin"; title: string; userName: string };
 const ownerLinks = [
   { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
   { label: "Registrar venta", href: "/sales/new", icon: ShoppingCart },
@@ -68,8 +68,13 @@ function UserMenu({ planExpiresAt, planTier = "unlimited", role, userName }: { p
   );
 }
 
-export function AppShell({ accentTheme = "blue", children, planExpiresAt, planTier, role, title, userName }: AppShellProps) {
-  const links = role === "admin" ? adminLinks : ownerLinks;
+export function AppShell({ accentTheme = "blue", children, enableCredits = false, enableCustomers = false, planExpiresAt, planTier, role, title, userName }: AppShellProps) {
+  const links = role === "admin" ? adminLinks : [
+    ...ownerLinks.slice(0, 4),
+    ...(enableCustomers ? [{ label: "Clientes", href: "/customers", icon: UserRound }] : []),
+    ...(enableCredits ? [{ label: "Por cobrar", href: "/receivables", icon: CircleDollarSign }] : []),
+    ...ownerLinks.slice(4),
+  ];
   const pathname = usePathname();
   const activeHref = links.filter(({ href }) => href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
   return (
