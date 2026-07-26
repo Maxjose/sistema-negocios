@@ -90,6 +90,18 @@ export async function toggleCategory(id: string, isActive: boolean) {
   revalidatePath("/settings");
 }
 
+export async function deleteCategory(id: string): Promise<{ error?: string }> {
+  const { profile, businessId, supabase } = await context();
+  const { count, error: usageError } = await supabase.from("products").select("*", { count: "exact", head: true }).eq("category_id", id);
+  if (usageError) return { error: usageError.message };
+  if ((count ?? 0) > 0) return { error: "No puedes borrar esta categoría porque está asignada a uno o más productos. Cambia primero la categoría de esos productos." };
+  const { error } = await supabase.from("categories").delete().eq("id", id);
+  if (error) return { error: "No se pudo borrar la categoría porque contiene información relacionada." };
+  await audit({ action: "category.deleted", type: "category", id, businessId, actorId: profile.id });
+  revalidatePath("/settings");
+  return {};
+}
+
 export async function updateCategory(id: string, formData: FormData) {
   const { profile, businessId, supabase } = await context();
   const parsed = settingSchema.safeParse({
@@ -134,6 +146,23 @@ export async function togglePaymentMethod(id: string, isActive: boolean) {
   if (error) throw new Error(error.message);
   await audit({ action: "payment_method.status_changed", type: "payment_method", id, businessId, actorId: profile.id, after: { is_active: isActive } });
   revalidatePath("/settings");
+}
+
+export async function deletePaymentMethod(id: string): Promise<{ error?: string }> {
+  const { profile, businessId, supabase } = await context();
+  const [{ count: salesCount }, { count: paymentsCount }, { count: receivablePaymentsCount }] = await Promise.all([
+    supabase.from("sales").select("*", { count: "exact", head: true }).eq("payment_method_id", id),
+    supabase.from("sale_payments").select("*", { count: "exact", head: true }).eq("payment_method_id", id),
+    supabase.from("receivable_payments").select("*", { count: "exact", head: true }).eq("payment_method_id", id),
+  ]);
+  if ((salesCount ?? 0) + (paymentsCount ?? 0) + (receivablePaymentsCount ?? 0) > 0) {
+    return { error: "No puedes borrar este método porque ya fue utilizado en ventas o abonos. Puedes conservarlo para mantener el historial." };
+  }
+  const { error } = await supabase.from("payment_methods").delete().eq("id", id);
+  if (error) return { error: "No se pudo borrar el método de pago porque contiene información relacionada." };
+  await audit({ action: "payment_method.deleted", type: "payment_method", id, businessId, actorId: profile.id });
+  revalidatePath("/settings");
+  return {};
 }
 
 export async function updatePaymentMethod(id: string, formData: FormData) {
