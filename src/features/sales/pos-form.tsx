@@ -125,9 +125,26 @@ export function PosForm({
       </section>
 
       <aside className="h-fit rounded-2xl border bg-surface p-5 xl:sticky xl:top-20">
-        <div className="flex items-center gap-2">
-          <ShoppingCart className="size-5 text-brand" />
-          <h2 className="font-bold">Venta actual</h2>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="size-5 text-brand" />
+            <h2 className="font-bold">Venta actual</h2>
+          </div>
+          {cart.length > 0 && (
+            <button
+              className="min-h-9 rounded-lg px-2 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+              onClick={() => {
+                if (window.confirm("¿Limpiar todos los productos del carrito?")) {
+                  setCart([]);
+                  setDiscount(0);
+                  setPayments([{ payment_method_id: "", amount: 0 }]);
+                }
+              }}
+              type="button"
+            >
+              Limpiar
+            </button>
+          )}
         </div>
         <div className="mt-4 space-y-3">
           {cart.length === 0 ? (
