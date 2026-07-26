@@ -42,7 +42,7 @@ export async function login(
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("role, status, must_change_password, businesses(status)")
+    .select("role, status, must_change_password, businesses(status, plan_expires_at)")
     .eq("id", authData.user.id)
     .single();
 
@@ -70,8 +70,11 @@ export async function login(
     return { error: "No se pudo completar el acceso. Intenta nuevamente." };
   }
 
+  const planExpired = profile.role === "owner" && business?.plan_expires_at && new Date(business.plan_expires_at) <= new Date();
   redirect(
-    profile.must_change_password
+    planExpired
+      ? "/plan-expired"
+      : profile.must_change_password
       ? "/change-password"
       : profile.role === "super_admin"
         ? "/admin"

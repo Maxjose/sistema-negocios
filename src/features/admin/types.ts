@@ -1,4 +1,5 @@
 export type BusinessStatus = "active" | "inactive";
+export type PlanTier = "free" | "basic" | "premium" | "unlimited";
 
 export type Business = {
   id: string;
@@ -13,6 +14,9 @@ export type Business = {
   use_stock: boolean;
   allow_discounts: boolean;
   allow_sale_notes: boolean;
+  plan_tier: PlanTier;
+  plan_started_at: string;
+  plan_expires_at: string | null;
   created_at: string;
 };
 

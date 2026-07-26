@@ -10,7 +10,7 @@ import { logout } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
 import type { AccentTheme } from "@/features/catalog/types";
 
-type AppShellProps = { accentTheme?: AccentTheme; children: React.ReactNode; role: "owner" | "admin"; title: string; userName: string };
+type AppShellProps = { accentTheme?: AccentTheme; children: React.ReactNode; planExpiresAt?: string | null; planTier?: "free" | "basic" | "premium" | "unlimited"; role: "owner" | "admin"; title: string; userName: string };
 const ownerLinks = [
   { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
   { label: "Registrar venta", href: "/sales/new", icon: ShoppingCart },
@@ -32,7 +32,7 @@ function LinkPendingIndicator() {
   return <span aria-hidden className={cn("ml-auto size-2 rounded-full bg-current opacity-0", pending && "animate-pulse opacity-50")} />;
 }
 
-function UserMenu({ role, userName }: { role: "owner" | "admin"; userName: string }) {
+function UserMenu({ planExpiresAt, planTier = "unlimited", role, userName }: { planExpiresAt?: string | null; planTier?: "free" | "basic" | "premium" | "unlimited"; role: "owner" | "admin"; userName: string }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -43,6 +43,7 @@ function UserMenu({ role, userName }: { role: "owner" | "admin"; userName: strin
     return () => window.removeEventListener("pointerdown", close);
   }, []);
   const roleLabel = role === "admin" ? "Administrador" : "Propietario";
+  const planLabel = ({ free: "Free", basic: "Basic", premium: "Premium", unlimited: "Unlimited" } as const)[planTier];
   return (
     <div className="relative" ref={containerRef}>
       <button aria-expanded={open} aria-haspopup="menu" className="flex items-center gap-2 rounded-xl p-1.5 text-left transition hover:bg-accent" onClick={() => setOpen((current) => !current)} type="button">
@@ -56,7 +57,7 @@ function UserMenu({ role, userName }: { role: "owner" | "admin"; userName: strin
             <UserCircle className="size-10 shrink-0 text-muted" />
             <div className="min-w-0"><p className="truncate text-sm font-bold">{userName}</p><p className="text-xs text-muted">{roleLabel}</p></div>
           </div>
-          <div className="flex items-center justify-between px-3 py-4 text-sm"><span className="text-muted">Plan</span><span className="rounded-full border bg-accent/60 px-3 py-1 text-xs font-semibold text-brand-strong">Básico</span></div>
+          <div className="px-3 py-4 text-sm"><div className="flex items-center justify-between"><span className="text-muted">Plan</span><span className="rounded-full border bg-accent/60 px-3 py-1 text-xs font-semibold text-brand-strong">{planLabel}</span></div>{role === "owner" && <p className="mt-2 text-right text-xs text-muted">{planExpiresAt ? `Vence ${new Intl.DateTimeFormat("es-VE", { dateStyle: "medium" }).format(new Date(planExpiresAt))}` : "Sin vencimiento"}</p>}</div>
           <Link className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold text-foreground transition hover:bg-accent" href={role === "admin" ? "/admin/settings" : "/settings"} onClick={() => setOpen(false)} role="menuitem">
             <Settings className="size-4 text-muted" /> Configuración
           </Link>
@@ -67,7 +68,7 @@ function UserMenu({ role, userName }: { role: "owner" | "admin"; userName: strin
   );
 }
 
-export function AppShell({ accentTheme = "blue", children, role, title, userName }: AppShellProps) {
+export function AppShell({ accentTheme = "blue", children, planExpiresAt, planTier, role, title, userName }: AppShellProps) {
   const links = role === "admin" ? adminLinks : ownerLinks;
   const pathname = usePathname();
   const activeHref = links.filter(({ href }) => href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
@@ -82,7 +83,7 @@ export function AppShell({ accentTheme = "blue", children, role, title, userName
       <div className="min-w-0">
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-surface/95 px-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex items-center gap-3"><BrandMark compact className="lg:hidden" /><h1 className="text-lg font-bold tracking-tight">{title}</h1></div>
-          <div className="flex items-center gap-2"><ThemeToggle /><UserMenu role={role} userName={userName} /></div>
+          <div className="flex items-center gap-2"><ThemeToggle /><UserMenu planExpiresAt={planExpiresAt} planTier={planTier} role={role} userName={userName} /></div>
         </header>
         <main className="p-4 pb-24 sm:p-6 sm:pb-24 lg:p-8">{children}</main>
       </div>

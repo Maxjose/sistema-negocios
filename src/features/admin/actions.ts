@@ -45,6 +45,25 @@ const businessFeaturesSchema = z.object({
   allow_discounts: z.boolean(),
   allow_sale_notes: z.boolean(),
 });
+const planSchema = z.enum(["free", "basic", "premium", "unlimited"]);
+
+export async function updateBusinessPlan(id: string, _state: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  await requireRole("super_admin");
+  const parsed = planSchema.safeParse(formData.get("plan_tier"));
+  if (!parsed.success) return { error: "Selecciona un plan válido." };
+  const admin = createAdminClient();
+  const { data: before } = await admin.from("businesses").select("plan_tier, plan_started_at, plan_expires_at").eq("id", id).single();
+  if (!before) return { error: "El negocio no existe." };
+  const startedAt = new Date();
+  const expiresAt = parsed.data === "unlimited" ? null : new Date(startedAt.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const payload = { plan_tier: parsed.data, plan_started_at: startedAt.toISOString(), plan_expires_at: expiresAt };
+  const { error } = await admin.from("businesses").update(payload).eq("id", id);
+  if (error) return { error: error.message };
+  await audit({ action: "business.plan_updated", entityType: "business", entityId: id, businessId: id, before, after: payload });
+  revalidatePath("/admin/businesses");
+  revalidatePath(`/admin/businesses/${id}`);
+  return { success: parsed.data === "unlimited" ? "Plan Unlimited activado sin vencimiento." : "Plan actualizado por 30 días." };
+}
 
 async function audit(input: {
   action: string;

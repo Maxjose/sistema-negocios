@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { BusinessForm } from "@/features/admin/business-form";
 import { BusinessFeaturesForm } from "@/features/admin/business-features-form";
+import { BusinessPlanForm } from "@/features/admin/business-plan-form";
 import { getBusiness } from "@/features/admin/data";
 import { LogoForm } from "@/features/admin/logo-form";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -18,7 +19,7 @@ export default async function BusinessDetailPage({
 }) {
   const { id } = await params;
   const { tab } = await searchParams;
-  const activeTab = tab === "features" ? "features" : "information";
+  const activeTab = tab === "features" || tab === "plan" ? tab : "information";
   const business = await getBusiness(id);
   if (!business) notFound();
 
@@ -71,6 +72,9 @@ export default async function BusinessDetailPage({
         >
           Funciones
         </Link>
+        <Link className={`border-b-2 px-4 py-3 text-sm font-semibold ${activeTab === "plan" ? "border-brand text-brand" : "border-transparent text-muted"}`} href={`/admin/businesses/${id}?tab=plan`}>
+          Plan
+        </Link>
       </nav>
 
       {activeTab === "information" ? (
@@ -87,7 +91,7 @@ export default async function BusinessDetailPage({
             <LogoForm businessId={business.id} />
           </aside>
         </div>
-      ) : (
+      ) : activeTab === "features" ? (
         <section className="mt-6 rounded-2xl border bg-surface p-5 sm:p-7">
           <h3 className="font-bold">Funciones disponibles</h3>
           <p className="mb-6 mt-2 text-sm leading-6 text-muted">
@@ -95,6 +99,12 @@ export default async function BusinessDetailPage({
             propietario.
           </p>
           <BusinessFeaturesForm business={business} />
+        </section>
+      ) : (
+        <section className="mt-6 rounded-2xl border bg-surface p-5 sm:p-7">
+          <h3 className="font-bold">Plan del negocio</h3>
+          <p className="mb-6 mt-2 text-sm leading-6 text-muted">Cambiar un plan inicia un nuevo periodo. Free, Basic y Premium duran 30 días; Unlimited no vence.</p>
+          <BusinessPlanForm business={business} />
         </section>
       )}
     </div>

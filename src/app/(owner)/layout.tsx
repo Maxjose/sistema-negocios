@@ -8,10 +8,11 @@ export default async function OwnerLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const profile = await requireRole("owner");
   if (profile.must_change_password) redirect("/change-password");
+  if (profile.plan_expires_at && new Date(profile.plan_expires_at) <= new Date()) redirect("/plan-expired");
   const accentTheme = await getBusinessAccent();
 
   return (
-    <AppShell accentTheme={accentTheme} role="owner" title="Mi negocio" userName={profile.full_name}>
+    <AppShell accentTheme={accentTheme} planExpiresAt={profile.plan_expires_at} planTier={profile.plan_tier ?? "free"} role="owner" title="Mi negocio" userName={profile.full_name}>
       {children}
     </AppShell>
   );
