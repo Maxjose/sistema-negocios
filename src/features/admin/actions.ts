@@ -59,6 +59,7 @@ const businessFeaturesSchema = z.object({
   enable_customers: z.boolean(),
   enable_credits: z.boolean(),
   enable_stock_adjustments: z.boolean(),
+  enable_multicurrency: z.boolean(),
 });
 const planSchema = z.enum(["free", "basic", "premium", "unlimited"]);
 
@@ -222,6 +223,7 @@ export async function updateBusinessFeatures(
     enable_customers: formData.get("enable_customers") === "on",
     enable_credits: formData.get("enable_credits") === "on",
     enable_stock_adjustments: formData.get("enable_stock_adjustments") === "on",
+    enable_multicurrency: formData.get("enable_multicurrency") === "on",
   });
   if (!parsed.success) return { error: "No se pudo validar la configuración." };
   if (parsed.data.enable_credits && !parsed.data.enable_customers) {
@@ -234,7 +236,7 @@ export async function updateBusinessFeatures(
   const admin = createAdminClient();
   const { data: before } = await admin
     .from("businesses")
-    .select("use_stock, allow_discounts, allow_sale_notes, enable_customers, enable_credits, enable_stock_adjustments")
+    .select("use_stock, allow_discounts, allow_sale_notes, enable_customers, enable_credits, enable_stock_adjustments, enable_multicurrency")
     .eq("id", id)
     .single();
   if (!before) return { error: "El negocio no existe." };

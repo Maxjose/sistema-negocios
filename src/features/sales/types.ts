@@ -16,6 +16,7 @@ export type Sale = {
   voided_at: string | null;
   sale_items?: SaleItem[];
   sale_payments?: SalePayment[];
+  sale_exchange_rates?: import("@/features/currency/types").SaleExchangeRate[];
 };
 
 export type ReceiptBusiness = {

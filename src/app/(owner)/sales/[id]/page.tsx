@@ -9,6 +9,7 @@ import { voidSale } from "@/features/sales/actions";
 import { getReceiptBusiness, getSale } from "@/features/sales/data";
 import { PrintReceiptButton } from "@/features/sales/print-receipt-button";
 import { formatMoney } from "@/lib/money";
+import { formatCurrencyAmount, roundConverted } from "@/features/currency/conversion";
 
 export default async function SaleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,6 +23,13 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
     timeZone: business.timezone,
   }).format(new Date(sale.sold_at));
   const money = (amount: number) => formatMoney(amount, business.currency_code);
+  const equivalents = (sale.sale_exchange_rates ?? []).map((rate) => ({
+    currency: rate.quote_currency,
+    amount: roundConverted(Number(sale.total), Number(rate.rate), Number(rate.rounding_increment)),
+    rate: Number(rate.rate),
+    source: rate.source,
+    effectiveDate: rate.effective_date,
+  }));
   const whatsappUrl = sale.customer_name && sale.customers?.phone
     ? invoiceWhatsappUrl({
         businessName: business.name,
@@ -37,6 +45,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
         phone: sale.customers.phone,
         saleNumber: sale.sale_number,
         total: Number(sale.total),
+        equivalents: equivalents.map(({ currency, amount }) => ({ currency, amount })),
       })
     : null;
 
@@ -109,7 +118,10 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             <div className="flex justify-between gap-6"><span className="text-muted">Subtotal</span><span>{money(Number(sale.subtotal))}</span></div>
             {Number(sale.discount) > 0 && <div className="flex justify-between gap-6"><span className="text-muted">Descuento</span><span>-{money(Number(sale.discount))}</span></div>}
             <div className="flex justify-between gap-6 border-t pt-3 text-lg font-bold"><span>Total</span><span>{money(Number(sale.total))}</span></div>
+            {equivalents.map((equivalent) => <div className="flex justify-between gap-6 text-sm" key={equivalent.currency}><span className="text-muted">Equivalente {equivalent.currency}</span><strong>{formatCurrencyAmount(equivalent.amount, equivalent.currency)}</strong></div>)}
           </div>
+
+          {equivalents.length > 0 && <div className="mt-5 rounded-xl border p-4"><p className="text-xs font-semibold uppercase text-muted">Tasas aplicadas a esta venta</p><div className="mt-2 space-y-1">{equivalents.map((equivalent) => <p className="text-xs text-muted" key={equivalent.currency}>1 {business.currency_code} = {equivalent.rate.toLocaleString("es-VE", { maximumFractionDigits: 8 })} {equivalent.currency} · {equivalent.source}{equivalent.effectiveDate ? ` · ${equivalent.effectiveDate}` : ""}</p>)}</div></div>}
 
           <div className="receipt-payment mt-7 grid gap-4 rounded-xl bg-accent p-4 sm:grid-cols-2">
             <div><p className="text-xs font-semibold uppercase text-muted">Método de pago</p><p className="mt-1 font-semibold">{sale.payment_method_name}</p></div>

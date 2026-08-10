@@ -12,6 +12,8 @@ import type {
 import { confirmSale, type SaleState } from "@/features/sales/actions";
 import { formatMoney } from "@/lib/money";
 import type { Customer } from "@/features/customers/types";
+import type { CurrencyDisplayConfig } from "@/features/currency/types";
+import { CurrencyEquivalents } from "@/features/currency/currency-equivalents";
 
 type CartItem = { product: Product; quantity: number };
 type Payment = { payment_method_id: string; amount: number };
@@ -22,11 +24,13 @@ export function PosForm({
   methods,
   features,
   customers,
+  currencyConfig,
 }: {
   products: Product[];
   methods: PaymentMethod[];
   features: BusinessFeatures;
   customers: Customer[];
+  currencyConfig: CurrencyDisplayConfig;
 }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [query, setQuery] = useState("");
@@ -121,8 +125,9 @@ export function PosForm({
                   </p>
                 )}
                 <p className="mt-4 text-lg font-bold text-brand">
-                  {formatMoney(Number(product.sale_price))}
+                  {formatMoney(Number(product.sale_price), currencyConfig.baseCurrency)}
                 </p>
+                <CurrencyEquivalents amount={Number(product.sale_price)} className="mt-1" config={currencyConfig} />
               </button>
             );
           })}
@@ -183,9 +188,7 @@ export function PosForm({
                       <Plus className="size-3" />
                     </button>
                   </div>
-                  <span className="text-sm font-semibold">
-                    {formatMoney(Number(product.sale_price) * quantity)}
-                  </span>
+                  <span className="text-right"><span className="block text-sm font-semibold">{formatMoney(Number(product.sale_price) * quantity, currencyConfig.baseCurrency)}</span><CurrencyEquivalents amount={Number(product.sale_price) * quantity} className="justify-end" config={currencyConfig} /></span>
                 </div>
               </div>
             ))
@@ -326,17 +329,18 @@ export function PosForm({
         <div className="mt-5 space-y-2 border-t pt-4 text-sm">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>{formatMoney(subtotal)}</span>
+            <span>{formatMoney(subtotal, currencyConfig.baseCurrency)}</span>
           </div>
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>
-            <span>{formatMoney(total)}</span>
+            <span>{formatMoney(total, currencyConfig.baseCurrency)}</span>
           </div>
+          <CurrencyEquivalents amount={total} className="justify-end text-right" config={currencyConfig} />
           {payments.length > 1 && (
             <div className="flex justify-between text-xs">
               <span>Por asignar</span>
               <span className={Math.abs(total - paymentTotal) < 0.005 ? "text-brand" : "text-red-600"}>
-                {formatMoney(total - paymentTotal)}
+                {formatMoney(total - paymentTotal, currencyConfig.baseCurrency)}
               </span>
             </div>
           )}

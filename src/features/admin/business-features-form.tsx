@@ -43,6 +43,11 @@ const options = [
     title: "Ajustes de inventario",
     description: "Permite corregir existencias indicando un motivo y conserva el historial.",
   },
+  {
+    name: "enable_multicurrency",
+    title: "Precios en varias monedas",
+    description: "Permite mostrar equivalencias en bolívares y pesos colombianos y configurar tasas automáticas o manuales.",
+  },
 ] as const;
 
 export function BusinessFeaturesForm({ business }: { business: Business }) {

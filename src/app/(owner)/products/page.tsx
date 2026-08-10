@@ -5,6 +5,8 @@ import { getBusinessFeatures, getCategories, getProducts } from "@/features/cata
 import { ProductImportForm } from "@/features/catalog/product-import-form";
 import { ProductCreateDialog } from "@/features/catalog/product-create-dialog";
 import { formatMoney } from "@/lib/money";
+import { getCurrencyDisplayConfig } from "@/features/currency/data";
+import { CurrencyEquivalents } from "@/features/currency/currency-equivalents";
 
 function stockLabel(stock: number, threshold: number) {
   if (stock === 0) return { text: "Agotado", className: "bg-red-50 text-red-700" };
@@ -15,7 +17,7 @@ function stockLabel(stock: number, threshold: number) {
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ q?: string; stock?: string }> }) {
   const filters = await searchParams;
   const query = filters.q?.trim().toLowerCase() ?? "";
-  const [allProducts, features, categories] = await Promise.all([getProducts(), getBusinessFeatures(), getCategories()]);
+  const [allProducts, features, categories, currencyConfig] = await Promise.all([getProducts(), getBusinessFeatures(), getCategories(), getCurrencyDisplayConfig()]);
   const products = allProducts.filter((product) => {
     const matchesQuery = !query || product.name.toLowerCase().includes(query) || product.sku?.toLowerCase().includes(query);
     const matchesStock = !features.use_stock || !filters.stock ||
@@ -49,7 +51,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       {products.length === 0 ? (
         <section className="mt-7 rounded-2xl border border-dashed bg-surface p-12 text-center"><PackageOpen className="mx-auto size-8 text-muted" /><h3 className="mt-4 font-bold">Aún no hay productos</h3><p className="mt-2 text-sm text-muted">Agrega el primero o importa un archivo CSV.</p></section>
       ) : (
-        <div className="mt-7 overflow-hidden rounded-2xl border bg-surface"><div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-background text-xs uppercase tracking-wide text-muted"><tr><th className="px-5 py-3">Producto</th><th className="px-5 py-3">Categoría</th><th className="px-5 py-3">Venta</th>{features.use_stock && <><th className="px-5 py-3">Existencia</th><th className="px-5 py-3">Disponibilidad</th></>}<th className="px-5 py-3 text-right">Acción</th></tr></thead><tbody className="divide-y">{products.map((product) => { const stock = stockLabel(product.stock_quantity, product.low_stock_threshold); return <tr key={product.id}><td className="px-5 py-4"><p className="font-semibold">{product.name}</p><p className="text-xs text-muted">{product.sku || "Sin SKU"}</p></td><td className="px-5 py-4">{product.categories?.name ?? "Sin categoría"}</td><td className="px-5 py-4">{formatMoney(Number(product.sale_price))}</td>{features.use_stock && <><td className="px-5 py-4 font-semibold">{product.stock_quantity}</td><td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${stock.className}`}>{stock.text}</span></td></>}<td className="px-5 py-4 text-right"><Link className="font-semibold text-brand" href={`/products/${product.id}`}>Gestionar</Link></td></tr>; })}</tbody></table></div></div>
+        <div className="mt-7 overflow-hidden rounded-2xl border bg-surface"><div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-background text-xs uppercase tracking-wide text-muted"><tr><th className="px-5 py-3">Producto</th><th className="px-5 py-3">Categoría</th><th className="px-5 py-3">Venta</th>{features.use_stock && <><th className="px-5 py-3">Existencia</th><th className="px-5 py-3">Disponibilidad</th></>}<th className="px-5 py-3 text-right">Acción</th></tr></thead><tbody className="divide-y">{products.map((product) => { const stock = stockLabel(product.stock_quantity, product.low_stock_threshold); return <tr key={product.id}><td className="px-5 py-4"><p className="font-semibold">{product.name}</p><p className="text-xs text-muted">{product.sku || "Sin SKU"}</p></td><td className="px-5 py-4">{product.categories?.name ?? "Sin categoría"}</td><td className="px-5 py-4"><span className="font-semibold">{formatMoney(Number(product.sale_price), currencyConfig.baseCurrency)}</span><CurrencyEquivalents amount={Number(product.sale_price)} className="mt-1" config={currencyConfig} /></td>{features.use_stock && <><td className="px-5 py-4 font-semibold">{product.stock_quantity}</td><td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${stock.className}`}>{stock.text}</span></td></>}<td className="px-5 py-4 text-right"><Link className="font-semibold text-brand" href={`/products/${product.id}`}>Gestionar</Link></td></tr>; })}</tbody></table></div></div>
       )}
     </div>
   );

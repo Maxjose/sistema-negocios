@@ -20,6 +20,7 @@ export type BusinessFeatures = {
   enable_customers: boolean;
   enable_credits: boolean;
   enable_stock_adjustments: boolean;
+  enable_multicurrency: boolean;
 };
 
 export type AccentTheme = "default" | "emerald" | "blue" | "violet" | "rose" | "amber" | "cyan";

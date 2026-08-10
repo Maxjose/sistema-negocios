@@ -23,6 +23,8 @@ export const auditActionLabels: Record<string, string> = {
   "payment_method.status_changed": "Estado de método de pago actualizado",
   "sale.created": "Venta registrada",
   "sale.voided": "Venta anulada",
+  "currency.settings_updated": "Configuración de moneda actualizada",
+  "currency.global_rate_updated": "Tasa de cambio global actualizada",
 };
 
 export function getAuditActionLabel(action: string) {

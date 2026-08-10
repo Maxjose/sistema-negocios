@@ -65,3 +65,14 @@ El comando `npm run admin:create` crea o sincroniza el primer
 
 La contraseña temporal debe eliminarse de `.env` inmediatamente después de
 crear y comprobar la cuenta.
+
+## Precios en varias monedas
+
+La aplicación conserva el precio base del producto y puede mostrar equivalencias
+en VES y COP. Cada negocio decide qué monedas habilitar y si usa la tasa global
+automática o una tasa manual. Las tasas utilizadas se copian en cada venta para
+que las facturas históricas no cambien.
+
+Para automatizar las tasas en Vercel configura `BCV_API_KEY` y `CRON_SECRET`.
+La TRM colombiana se consulta desde Datos Abiertos Colombia y la tasa oficial
+venezolana mediante BCV API. El cron diario está definido en `vercel.json`.

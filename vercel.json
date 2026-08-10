@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/exchange-rates/refresh",
+      "schedule": "15 10 * * *"
+    }
+  ]
+}

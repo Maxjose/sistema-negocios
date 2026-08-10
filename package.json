@@ -20,6 +20,7 @@
     "test:plans": "node --env-file=.env scripts/verify-business-plans.mjs",
     "test:maintenance": "node --env-file=.env scripts/verify-maintenance-mode.mjs",
     "test:receivables": "node --env-file=.env scripts/verify-receivables-and-adjustments.mjs",
+    "test:currency": "node --env-file=.env scripts/verify-multicurrency.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "test:watch": "vitest",
     "admin:create": "node --env-file=.env scripts/create-super-admin.mjs",

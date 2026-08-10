@@ -55,7 +55,7 @@ export async function getBusinessFeatures(): Promise<BusinessFeatures> {
   const supabase = await ownerClient();
   const { data, error } = await supabase
     .from("businesses")
-    .select("use_stock, allow_discounts, allow_sale_notes, enable_customers, enable_credits, enable_stock_adjustments")
+    .select("use_stock, allow_discounts, allow_sale_notes, enable_customers, enable_credits, enable_stock_adjustments, enable_multicurrency")
     .single();
   if (error) throw new Error(error.message);
   return data as BusinessFeatures;

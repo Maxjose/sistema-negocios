@@ -25,6 +25,7 @@ export function invoiceWhatsappUrl(input: {
   phone: string;
   saleNumber: number;
   total: number;
+  equivalents?: Array<{ currency: string; amount: number }>;
 }) {
   const phone = input.phone.replace(/\D/g, "");
   const money = (amount: number) =>
@@ -37,6 +38,7 @@ export function invoiceWhatsappUrl(input: {
   const items = input.items
     .map((item) => `• ${item.quantity} × ${item.name}: ${money(item.subtotal)}`)
     .join("\n");
+  const equivalents = input.equivalents?.map((item) => `Equivalente: ${new Intl.NumberFormat("es-VE", { style: "currency", currency: item.currency, maximumFractionDigits: 2 }).format(item.amount)}`) ?? [];
   const message = [
     `*${input.businessName}*`,
     `Factura V-${String(input.saleNumber).padStart(6, "0")}`,
@@ -46,6 +48,7 @@ export function invoiceWhatsappUrl(input: {
     items,
     "",
     `*Total: ${money(input.total)}*`,
+    ...equivalents,
     `Método de pago: ${input.paymentMethod}`,
     "",
     "Gracias por su compra.",
