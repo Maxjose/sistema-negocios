@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizeEffectiveDate } from "@/features/currency/rate-date";
 
 type RetrievedRate = { quote: "VES" | "COP"; rate: number; effectiveDate: string; source: string; raw: unknown };
 
@@ -17,7 +18,7 @@ async function fetchCopRate(): Promise<RetrievedRate> {
   const rows = await response.json() as Array<{ valor?: string; vigenciadesde?: string }>;
   const row = rows[0];
   if (!row?.valor || !row.vigenciadesde) throw new Error("La TRM no devolvió datos.");
-  return { quote: "COP", rate: validRate(row.valor), effectiveDate: row.vigenciadesde.slice(0, 10), source: "BANREP_TRM", raw: row };
+  return { quote: "COP", rate: validRate(row.valor), effectiveDate: normalizeEffectiveDate(row.vigenciadesde), source: "BANREP_TRM", raw: row };
 }
 
 async function fetchVesRate(): Promise<RetrievedRate> {
@@ -31,7 +32,7 @@ async function fetchVesRate(): Promise<RetrievedRate> {
   if (!response.ok) throw new Error(`BCV API respondió ${response.status}.`);
   const data = await response.json() as { tasa?: number | string; fecha?: string };
   if (!data.fecha) throw new Error("BCV API no devolvió la fecha efectiva.");
-  return { quote: "VES", rate: validRate(data.tasa), effectiveDate: data.fecha.slice(0, 10), source: "BCV", raw: data };
+  return { quote: "VES", rate: validRate(data.tasa), effectiveDate: normalizeEffectiveDate(data.fecha), source: "BCV", raw: data };
 }
 
 export async function refreshAutomaticRates() {
