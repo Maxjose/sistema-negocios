@@ -5,6 +5,25 @@ import { normalizeEffectiveDate } from "@/features/currency/rate-date";
 
 type RetrievedRate = { quote: "VES" | "COP"; rate: number; effectiveDate: string; source: string; raw: unknown };
 
+async function fetchWithRetry(url: string, attempts = 3) {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(20_000),
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error(`El proveedor respondió ${response.status}.`);
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("No fue posible consultar el proveedor.");
+}
+
 function validRate(value: unknown) {
   const number = typeof value === "string" ? Number(value.replace(",", ".")) : Number(value);
   if (!Number.isFinite(number) || number <= 0) throw new Error("La fuente devolvió una tasa inválida.");
@@ -13,7 +32,7 @@ function validRate(value: unknown) {
 
 async function fetchCopRate(): Promise<RetrievedRate> {
   const url = "https://www.datos.gov.co/resource/ceyp-9c7c.json?$limit=1&$order=vigenciadesde%20DESC";
-  const response = await fetch(url, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(12_000), cache: "no-store" });
+  const response = await fetchWithRetry(url);
   if (!response.ok) throw new Error(`TRM Colombia respondió ${response.status}.`);
   const rows = await response.json() as Array<{ valor?: string; vigenciadesde?: string }>;
   const row = rows[0];
