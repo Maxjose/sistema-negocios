@@ -21,11 +21,29 @@ try {
       use_stock: false,
       allow_discounts: false,
       allow_sale_notes: false,
+      enable_barcode_scanner: false,
     })
     .select("id")
     .single();
   if (businessError) throw businessError;
   ids.business = business.id;
+
+  const { data: barcodeFeature, error: barcodeFeatureError } = await admin
+    .from("businesses")
+    .select("enable_barcode_scanner")
+    .eq("id", ids.business)
+    .single();
+  if (barcodeFeatureError) throw barcodeFeatureError;
+  if (barcodeFeature.enable_barcode_scanner) throw new Error("Barcode scanner should be disabled.");
+
+  const { data: enabledBarcodeFeature, error: enableBarcodeFeatureError } = await admin
+    .from("businesses")
+    .update({ enable_barcode_scanner: true })
+    .eq("id", ids.business)
+    .select("enable_barcode_scanner")
+    .single();
+  if (enableBarcodeFeatureError) throw enableBarcodeFeatureError;
+  if (!enabledBarcodeFeature.enable_barcode_scanner) throw new Error("Barcode scanner was not enabled.");
 
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
     email,

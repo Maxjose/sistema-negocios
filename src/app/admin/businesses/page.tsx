@@ -40,6 +40,7 @@ export default async function BusinessesPage() {
                 <span className="rounded-full bg-background px-2.5 py-1">{business.use_stock ? "Con stock" : "Sin stock"}</span>
                 {business.allow_discounts && <span className="rounded-full bg-background px-2.5 py-1">Descuentos</span>}
                 {business.allow_sale_notes && <span className="rounded-full bg-background px-2.5 py-1">Notas</span>}
+                {business.enable_barcode_scanner && <span className="rounded-full bg-background px-2.5 py-1">Lector</span>}
               </div>
               <Link className="mt-4 inline-flex font-semibold text-brand" href={`/admin/businesses/${business.id}`}>Gestionar</Link>
             </article>
@@ -64,7 +65,7 @@ export default async function BusinessesPage() {
                     <td className="px-5 py-4 font-semibold">{business.name}</td>
                     <td className="px-5 py-4">{business.currency_code}</td>
                     <td className="px-5 py-4 text-muted">{business.timezone}</td>
-                    <td className="px-5 py-4"><div className="flex flex-wrap gap-1.5 text-xs"><span className="rounded-full bg-background px-2 py-1">{business.use_stock ? "Stock" : "Sin stock"}</span>{business.allow_discounts && <span className="rounded-full bg-background px-2 py-1">Descuentos</span>}{business.allow_sale_notes && <span className="rounded-full bg-background px-2 py-1">Notas</span>}</div></td>
+                    <td className="px-5 py-4"><div className="flex flex-wrap gap-1.5 text-xs"><span className="rounded-full bg-background px-2 py-1">{business.use_stock ? "Stock" : "Sin stock"}</span>{business.allow_discounts && <span className="rounded-full bg-background px-2 py-1">Descuentos</span>}{business.allow_sale_notes && <span className="rounded-full bg-background px-2 py-1">Notas</span>}{business.enable_barcode_scanner && <span className="rounded-full bg-background px-2 py-1">Lector</span>}</div></td>
                     <td className="px-5 py-4">
                       <span className={business.status === "active" ? "rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-brand-strong" : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"}>
                         {business.status === "active" ? "Activo" : "Inactivo"}

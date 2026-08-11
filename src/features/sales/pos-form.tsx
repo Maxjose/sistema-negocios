@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, Grid2X2, List, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import type { SaleCustomer } from "@/features/customers/types";
 import type { CurrencyDisplayConfig } from "@/features/currency/types";
 import { CurrencyEquivalents } from "@/features/currency/currency-equivalents";
 import { cn } from "@/lib/utils";
+import { BarcodeScanner, type BarcodeFeedback } from "@/features/sales/barcode-scanner";
+import { findProductByBarcode } from "@/features/sales/barcode";
 
 type CartItem = { product: Product; quantity: number };
 type Payment = { payment_method_id: string; amount: number };
@@ -46,6 +48,7 @@ export function PosForm({
   const [catalogView, setCatalogView] = useState<"grid" | "list">("grid");
   const [saleType, setSaleType] = useState<"cash" | "credit">("cash");
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [barcodeFeedback, setBarcodeFeedback] = useState<BarcodeFeedback | null>(null);
   const [state, action, pending] = useActionState(confirmSale, initialState);
   const visible = products.filter(
     (product) =>
@@ -96,6 +99,26 @@ export function PosForm({
         : [...items, { product, quantity }],
     );
   };
+  const addProductByBarcode = useCallback((code: string) => {
+    const product = findProductByBarcode(products, code);
+    if (!product || !product.is_active) {
+      setBarcodeFeedback({ kind: "error", message: `No hay un producto activo con el código ${code.trim()}.` });
+      return;
+    }
+
+    setCart((items) => {
+      const current = items.find((item) => item.product.id === product.id)?.quantity ?? 0;
+      if (features.use_stock && current >= product.stock_quantity) {
+        setBarcodeFeedback({ kind: "error", message: `${product.name} no tiene más unidades disponibles.` });
+        return items;
+      }
+
+      setBarcodeFeedback({ kind: "success", message: `${product.name} agregado al carrito.` });
+      return items.some((item) => item.product.id === product.id)
+        ? items.map((item) => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+        : [...items, { product, quantity: 1 }];
+    });
+  }, [features.use_stock, products]);
 
   return (
     <form action={action} className="grid gap-6 xl:grid-cols-[1fr_24rem]">
@@ -103,10 +126,11 @@ export function PosForm({
         <input
           className="h-12 w-full rounded-xl border bg-surface px-4"
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Buscar producto por nombre o SKU"
+          placeholder="Buscar producto por nombre, SKU o código"
           ref={searchRef}
           value={query}
         />
+        {features.enable_barcode_scanner && <BarcodeScanner feedback={barcodeFeedback} onScan={addProductByBarcode} />}
         <div className="mt-3 flex items-center gap-2">
           <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
             <button className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${!category ? "bg-brand text-white" : "border bg-surface"}`} onClick={() => setCategory("")} type="button">Todos</button>

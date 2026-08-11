@@ -48,6 +48,11 @@ const options = [
     title: "Precios en varias monedas",
     description: "Permite mostrar equivalencias en bolívares y pesos colombianos y configurar tasas automáticas o manuales.",
   },
+  {
+    name: "enable_barcode_scanner",
+    title: "Lector de códigos de barras",
+    description: "Permite agregar productos en la caja con un lector USB o Bluetooth, entrada manual o la cámara del dispositivo.",
+  },
 ] as const;
 
 export function BusinessFeaturesForm({ business }: { business: Business }) {

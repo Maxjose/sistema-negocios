@@ -18,6 +18,7 @@ export type Business = {
   enable_credits: boolean;
   enable_stock_adjustments: boolean;
   enable_multicurrency: boolean;
+  enable_barcode_scanner: boolean;
   plan_tier: PlanTier;
   plan_started_at: string;
   plan_expires_at: string | null;

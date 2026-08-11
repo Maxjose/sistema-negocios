@@ -40,11 +40,11 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           <CsvDownloadButton filename="productos.csv" headers={["nombre", "sku", "categoria", "descripcion", "precio_costo", "precio_venta", "existencia", "minimo", "activo"]} label="Exportar" rows={exportRows} />
           <ProductImportForm />
           <CsvDownloadButton filename="plantilla-productos.csv" headers={["nombre", "sku", "categoria", "descripcion", "precio_costo", "precio_venta", "existencia", "minimo"]} label="Plantilla" rows={[["Producto ejemplo", "SKU-001", "", "", 10, 15, 20, 5]]} />
-          <ProductCreateDialog categories={categories} useStock={features.use_stock} />
+          <ProductCreateDialog categories={categories} enableBarcodeScanner={features.enable_barcode_scanner} useStock={features.use_stock} />
         </div>
       </div>
       <form className={`mt-6 grid gap-3 rounded-2xl border bg-surface p-4 ${features.use_stock ? "sm:grid-cols-[1fr_12rem_auto]" : "sm:grid-cols-[1fr_auto]"}`}>
-        <input className="h-11 rounded-xl border px-3" defaultValue={filters.q} name="q" placeholder="Buscar por nombre o SKU" />
+        <input className="h-11 rounded-xl border px-3" defaultValue={filters.q} name="q" placeholder="Buscar por nombre, SKU o código" />
         {features.use_stock && <select className="h-11 rounded-xl border px-3" defaultValue={filters.stock ?? ""} name="stock"><option value="">Todo el inventario</option><option value="available">Disponibles</option><option value="low">Pocas unidades</option><option value="out">Agotados</option></select>}
         <button className="rounded-xl bg-brand px-4 text-sm font-semibold text-white" type="submit">Filtrar</button>
       </form>
