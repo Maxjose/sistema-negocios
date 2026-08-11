@@ -1,6 +1,6 @@
 "use client";
 
-import Link, { useLinkStatus } from "next/link";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, Grid2X2, LayoutDashboard, LogOut, PanelLeftClose, PanelLeftOpen, ReceiptText, Settings, ShoppingCart, Store, UserCircle, UserRound, Users, X } from "lucide-react";
@@ -26,11 +26,6 @@ const adminLinks = [
   { label: "Actividad", href: "/admin/activity", icon: ReceiptText },
   { label: "Configuración", href: "/admin/settings", icon: Settings },
 ];
-
-function LinkPendingIndicator() {
-  const { pending } = useLinkStatus();
-  return <span aria-hidden className={cn("ml-auto size-2 rounded-full bg-current opacity-0", pending && "animate-pulse opacity-50")} />;
-}
 
 function UserMenu({ planDaysRemaining = null, planTier = "unlimited", role, userName }: { planDaysRemaining?: number | null; planTier?: "free" | "basic" | "premium" | "unlimited"; role: "owner" | "admin"; userName: string }) {
   const [open, setOpen] = useState(false);
@@ -97,7 +92,7 @@ export function AppShell({ accentTheme = "blue", children, enableCredits = false
       <aside className={cn("hidden h-dvh overflow-y-auto overscroll-contain border-r bg-surface py-6 transition-[padding] duration-300 lg:flex lg:flex-col", sidebarCollapsed ? "px-2" : "px-4")}>
         <BrandMark className={sidebarCollapsed ? "justify-center" : "px-2"} compact={sidebarCollapsed} />
         <nav aria-label="Navegación principal" className="mt-9 space-y-1">
-          {links.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-11 items-center rounded-xl text-sm font-medium text-muted transition hover:bg-accent hover:text-brand-strong", sidebarCollapsed ? "justify-center px-2" : "gap-3 px-3", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} title={sidebarCollapsed ? label : undefined}><Icon aria-hidden="true" className="size-[1.125rem] shrink-0" />{!sidebarCollapsed && <>{label}<LinkPendingIndicator /></>}</Link>)}
+          {links.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-11 items-center rounded-xl text-sm font-medium text-muted transition hover:bg-accent hover:text-brand-strong", sidebarCollapsed ? "justify-center px-2" : "gap-3 px-3", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} title={sidebarCollapsed ? label : undefined}><Icon aria-hidden="true" className="size-[1.125rem] shrink-0" />{!sidebarCollapsed && label}</Link>)}
         </nav>
         <button aria-label={sidebarCollapsed ? "Expandir menú lateral" : "Contraer menú lateral"} className={cn("mt-auto flex min-h-11 items-center rounded-xl text-sm font-semibold text-muted transition hover:bg-accent hover:text-brand-strong", sidebarCollapsed ? "justify-center px-2" : "gap-3 px-3")} onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} title={sidebarCollapsed ? "Expandir menú" : undefined} type="button">{sidebarCollapsed ? <PanelLeftOpen className="size-5" /> : <><PanelLeftClose className="size-5" /><span>Contraer menú</span></>}</button>
       </aside>
@@ -111,11 +106,11 @@ export function AppShell({ accentTheme = "blue", children, enableCredits = false
       {mobileMoreOpen && role === "owner" && <div className="fixed inset-0 z-50 bg-black/45 lg:hidden" onClick={() => setMobileMoreOpen(false)} role="presentation" />}
       {mobileMoreOpen && role === "owner" && <section aria-label="Más opciones" className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-[70] rounded-3xl border bg-surface p-3 shadow-2xl lg:hidden">
         <div className="flex items-center justify-between px-2 pb-2"><h2 className="font-bold">Más opciones</h2><button aria-label="Cerrar más opciones" className="grid size-9 place-items-center rounded-xl text-muted hover:bg-accent" onClick={() => setMobileMoreOpen(false)} type="button"><X className="size-5" /></button></div>
-        <div className="grid grid-cols-2 gap-2">{mobileMoreLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-14 items-center gap-3 rounded-2xl px-4 text-sm font-semibold text-muted transition hover:bg-accent hover:text-brand-strong", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon className="size-5" />{label}<LinkPendingIndicator /></Link>)}</div>
+        <div className="grid grid-cols-2 gap-2">{mobileMoreLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-14 items-center gap-3 rounded-2xl px-4 text-sm font-semibold text-muted transition hover:bg-accent hover:text-brand-strong", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon className="size-5" />{label}</Link>)}</div>
       </section>}
       <nav aria-label="Navegación móvil" className={cn("fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-surface px-1 pb-[env(safe-area-inset-bottom)] lg:hidden", mobileMoreOpen && "z-[60]")}>
-        {mobilePrimaryLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon aria-hidden="true" className="size-5" />{label === "Registrar venta" ? <><span className="max-w-16 truncate sm:hidden">Registrar</span><span className="hidden max-w-20 truncate sm:inline">Registrar venta</span></> : <span className="max-w-16 truncate">{label}</span>}<LinkPendingIndicator /></Link>)}
-        {role === "owner" && <Link aria-expanded={mobileMoreOpen} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", (mobileMoreActive || mobileMoreOpen) && "bg-accent text-brand-strong")} href={pathname} onClick={(event) => { event.preventDefault(); setMobileMoreOpen((open) => !open); }}><Grid2X2 aria-hidden="true" className="size-5" /><span className="max-w-16 truncate">Más</span><LinkPendingIndicator /></Link>}
+        {mobilePrimaryLinks.map(({ label, href, icon: Icon }) => <Link aria-current={href === activeHref ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", href === activeHref && "bg-accent text-brand-strong")} href={href} key={href} onClick={() => setMobileMoreOpen(false)}><Icon aria-hidden="true" className="size-5" />{label === "Registrar venta" ? <><span className="max-w-16 truncate sm:hidden">Registrar</span><span className="hidden max-w-20 truncate sm:inline">Registrar venta</span></> : <span className="max-w-16 truncate">{label}</span>}</Link>)}
+        {role === "owner" && <Link aria-expanded={mobileMoreOpen} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted hover:text-brand", (mobileMoreActive || mobileMoreOpen) && "bg-accent text-brand-strong")} href={pathname} onClick={(event) => { event.preventDefault(); setMobileMoreOpen((open) => !open); }}><Grid2X2 aria-hidden="true" className="size-5" /><span className="max-w-16 truncate">Más</span></Link>}
       </nav>
     </div>
   );
