@@ -17,6 +17,7 @@ export function BarcodeScanner({
   dialogDescription = "Cada código reconocido agrega una unidad al carrito.",
   dialogTitle = "Apunta al código de barras",
   feedback = null,
+  onOpen,
   onScan,
   showButtonLabel = false,
 }: {
@@ -26,6 +27,7 @@ export function BarcodeScanner({
   dialogDescription?: string;
   dialogTitle?: string;
   feedback?: BarcodeFeedback | null;
+  onOpen?: () => void | Promise<void>;
   onScan: (code: string) => void;
   showButtonLabel?: boolean;
 }) {
@@ -143,7 +145,10 @@ export function BarcodeScanner({
           !showButtonLabel && "size-12 min-h-0 px-0",
           buttonClassName,
         )}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          void onOpen?.();
+          setOpen(true);
+        }}
         title={buttonLabel}
         type="button"
       >

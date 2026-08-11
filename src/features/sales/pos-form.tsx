@@ -17,6 +17,7 @@ import { CurrencyEquivalents } from "@/features/currency/currency-equivalents";
 import { cn } from "@/lib/utils";
 import { BarcodeScanner, type BarcodeFeedback } from "@/features/sales/barcode-scanner";
 import { findProductByBarcode } from "@/features/sales/barcode";
+import { playBarcodeSuccessSound, prepareBarcodeSuccessSound } from "@/features/sales/barcode-sound";
 
 type CartItem = { product: Product; quantity: number };
 type Payment = { payment_method_id: string; amount: number };
@@ -36,6 +37,7 @@ export function PosForm({
   currencyConfig: CurrencyDisplayConfig;
 }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const cartRef = useRef<CartItem[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -76,6 +78,9 @@ export function PosForm({
   const categories = [...new Set(products.map((product) => product.categories?.name).filter(Boolean))] as string[];
   const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId);
   useEffect(() => {
+    cartRef.current = cart;
+  }, [cart]);
+  useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
       if (event.key === "/" && document.activeElement?.tagName !== "INPUT") {
         event.preventDefault();
@@ -103,21 +108,24 @@ export function PosForm({
     const product = findProductByBarcode(products, code);
     if (!product || !product.is_active) {
       setBarcodeFeedback({ kind: "error", message: `No hay un producto activo con el código ${code.trim()}.` });
-      return;
+      return false;
     }
 
-    setCart((items) => {
-      const current = items.find((item) => item.product.id === product.id)?.quantity ?? 0;
-      if (features.use_stock && current >= product.stock_quantity) {
-        setBarcodeFeedback({ kind: "error", message: `${product.name} no tiene más unidades disponibles.` });
-        return items;
-      }
+    const items = cartRef.current;
+    const current = items.find((item) => item.product.id === product.id)?.quantity ?? 0;
+    if (features.use_stock && current >= product.stock_quantity) {
+      setBarcodeFeedback({ kind: "error", message: `${product.name} no tiene más unidades disponibles.` });
+      return false;
+    }
 
-      setBarcodeFeedback({ kind: "success", message: `${product.name} agregado al carrito.` });
-      return items.some((item) => item.product.id === product.id)
-        ? items.map((item) => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
-        : [...items, { product, quantity: 1 }];
-    });
+    const nextItems = items.some((item) => item.product.id === product.id)
+      ? items.map((item) => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+      : [...items, { product, quantity: 1 }];
+    cartRef.current = nextItems;
+    setCart(nextItems);
+    setBarcodeFeedback({ kind: "success", message: `${product.name} agregado al carrito.` });
+    void playBarcodeSuccessSound();
+    return true;
   }, [features.use_stock, products]);
 
   return (
@@ -143,6 +151,7 @@ export function PosForm({
               buttonClassName="border-brand bg-brand text-white hover:bg-brand-strong hover:text-white"
               buttonLabel="Escanear código de producto"
               feedback={barcodeFeedback}
+              onOpen={prepareBarcodeSuccessSound}
               onScan={addProductByBarcode}
             />
           )}
