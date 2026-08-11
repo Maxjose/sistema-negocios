@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronUp, Grid2X2, List, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, Grid2X2, List, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type {
@@ -11,7 +11,7 @@ import type {
 } from "@/features/catalog/types";
 import { confirmSale, type SaleState } from "@/features/sales/actions";
 import { formatMoney } from "@/lib/money";
-import type { Customer } from "@/features/customers/types";
+import type { SaleCustomer } from "@/features/customers/types";
 import type { CurrencyDisplayConfig } from "@/features/currency/types";
 import { CurrencyEquivalents } from "@/features/currency/currency-equivalents";
 import { cn } from "@/lib/utils";
@@ -30,7 +30,7 @@ export function PosForm({
   products: Product[];
   methods: PaymentMethod[];
   features: BusinessFeatures;
-  customers: Customer[];
+  customers: SaleCustomer[];
   currencyConfig: CurrencyDisplayConfig;
 }) {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -45,6 +45,7 @@ export function PosForm({
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [catalogView, setCatalogView] = useState<"grid" | "list">("grid");
   const [saleType, setSaleType] = useState<"cash" | "credit">("cash");
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [state, action, pending] = useActionState(confirmSale, initialState);
   const visible = products.filter(
     (product) =>
@@ -70,6 +71,7 @@ export function PosForm({
     0,
   );
   const categories = [...new Set(products.map((product) => product.categories?.name).filter(Boolean))] as string[];
+  const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId);
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
       if (event.key === "/" && document.activeElement?.tagName !== "INPUT") {
@@ -223,8 +225,9 @@ export function PosForm({
           </div>
         )}
         <input name="sale_type" type="hidden" value={saleType} />
-        {saleType === "credit" && <div className="mt-4 grid gap-3"><label className="grid gap-1.5 text-sm font-semibold">Cliente<select className="h-11 rounded-xl border px-3" name="customer_id" required><option value="">Selecciona</option>{customers.filter((customer) => customer.is_active).map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}</select></label><label className="grid gap-1.5 text-sm font-semibold">Fecha de vencimiento<input className="h-11 rounded-xl border px-3" min={new Date().toISOString().slice(0, 10)} name="due_date" required type="date" /></label></div>}
-        {saleType === "cash" && <>{features.enable_customers ? <label className="mt-4 grid gap-1.5 text-sm font-semibold">Cliente <span className="font-normal text-muted">(opcional)</span><select className="h-11 rounded-xl border bg-surface px-3 text-foreground" name="customer_id"><option value="">Venta sin cliente</option>{customers.filter((customer) => customer.is_active).map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}</select></label> : <input name="customer_id" type="hidden" value="" />}<input name="due_date" type="hidden" value="" /></>}
+        {saleType === "credit" && <div className="mt-4 grid gap-3"><label className="grid gap-1.5 text-sm font-semibold">Cliente<select className="h-11 rounded-xl border bg-surface px-3 text-foreground" name="customer_id" onChange={(event) => setSelectedCustomerId(event.target.value)} required value={selectedCustomerId}><option value="">Selecciona</option>{customers.filter((customer) => customer.is_active).map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}</select></label><label className="grid gap-1.5 text-sm font-semibold">Fecha de vencimiento<input className="h-11 rounded-xl border px-3" min={new Date().toISOString().slice(0, 10)} name="due_date" required type="date" /></label></div>}
+        {saleType === "cash" && <>{features.enable_customers ? <label className="mt-4 grid gap-1.5 text-sm font-semibold">Cliente <span className="font-normal text-muted">(opcional)</span><select className="h-11 rounded-xl border bg-surface px-3 text-foreground" name="customer_id" onChange={(event) => setSelectedCustomerId(event.target.value)} value={selectedCustomerId}><option value="">Venta sin cliente</option>{customers.filter((customer) => customer.is_active).map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}</select></label> : <input name="customer_id" type="hidden" value="" />}<input name="due_date" type="hidden" value="" /></>}
+        {selectedCustomer && selectedCustomer.overdue_count > 0 && <div aria-live="polite" className="mt-4 flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-950 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-100" role="alert"><AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" /><div><p className="text-sm font-bold">Cliente con cuenta vencida</p><p className="mt-1 text-xs leading-5">{selectedCustomer.name} tiene {selectedCustomer.overdue_count} {selectedCustomer.overdue_count === 1 ? "cuenta vencida" : "cuentas vencidas"} por {formatMoney(selectedCustomer.overdue_balance, currencyConfig.baseCurrency)}. Tenlo presente antes de confirmar la venta.</p></div></div>}
         {saleType === "cash" && <>
         <label className="mt-5 block text-sm font-semibold">
           Método de pago

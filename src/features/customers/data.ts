@@ -2,7 +2,7 @@ import "server-only";
 
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import type { Customer, Receivable, ReceivablePayment } from "./types";
+import type { Customer, Receivable, ReceivablePayment, SaleCustomer } from "./types";
 
 async function context(requireCredits = false) {
   const profile = await requireRole("owner");
@@ -24,6 +24,39 @@ export async function getCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase.from("customers").select("*").order("name");
   if (error) throw new Error(error.message);
   return data as Customer[];
+}
+
+export async function getSaleCustomers(): Promise<SaleCustomer[]> {
+  const { supabase } = await context();
+  const today = new Date().toISOString().slice(0, 10);
+  const [{ data: customers, error: customersError }, { data: overdue, error: overdueError }] = await Promise.all([
+    supabase.from("customers").select("*").order("name"),
+    supabase
+      .from("receivables")
+      .select("customer_id, balance")
+      .eq("status", "open")
+      .lt("due_date", today)
+      .gt("balance", 0),
+  ]);
+  if (customersError || overdueError) throw new Error(customersError?.message ?? overdueError?.message);
+
+  const summaries = new Map<string, { count: number; balance: number }>();
+  for (const receivable of overdue ?? []) {
+    const current = summaries.get(receivable.customer_id) ?? { count: 0, balance: 0 };
+    summaries.set(receivable.customer_id, {
+      count: current.count + 1,
+      balance: current.balance + Number(receivable.balance),
+    });
+  }
+
+  return (customers as Customer[]).map((customer) => {
+    const summary = summaries.get(customer.id);
+    return {
+      ...customer,
+      overdue_count: summary?.count ?? 0,
+      overdue_balance: summary?.balance ?? 0,
+    };
+  });
 }
 
 export async function getReceivables(): Promise<Receivable[]> {

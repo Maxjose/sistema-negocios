@@ -8,6 +8,11 @@ export type Customer = {
   created_at: string;
 };
 
+export type SaleCustomer = Customer & {
+  overdue_count: number;
+  overdue_balance: number;
+};
+
 export type Receivable = {
   id: string;
   customer_id: string;
