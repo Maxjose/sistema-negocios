@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Grid2X2, List, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type {
@@ -14,6 +14,7 @@ import { formatMoney } from "@/lib/money";
 import type { Customer } from "@/features/customers/types";
 import type { CurrencyDisplayConfig } from "@/features/currency/types";
 import { CurrencyEquivalents } from "@/features/currency/currency-equivalents";
+import { cn } from "@/lib/utils";
 
 type CartItem = { product: Product; quantity: number };
 type Payment = { payment_method_id: string; amount: number };
@@ -41,6 +42,8 @@ export function PosForm({
     { payment_method_id: "", amount: 0 },
   ]);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  const [catalogView, setCatalogView] = useState<"grid" | "list">("grid");
   const [saleType, setSaleType] = useState<"cash" | "credit">("cash");
   const [state, action, pending] = useActionState(confirmSale, initialState);
   const visible = products.filter(
@@ -77,7 +80,6 @@ export function PosForm({
     window.addEventListener("keydown", focusSearch);
     return () => window.removeEventListener("keydown", focusSearch);
   }, []);
-
   const setQuantity = (product: Product, quantity: number) => {
     if (quantity <= 0) {
       setCart((items) => items.filter((item) => item.product.id !== product.id));
@@ -95,7 +97,7 @@ export function PosForm({
 
   return (
     <form action={action} className="grid gap-6 xl:grid-cols-[1fr_24rem]">
-      <section>
+      <section className="pb-20 xl:pb-0">
         <input
           className="h-12 w-full rounded-xl border bg-surface px-4"
           onChange={(event) => setQuery(event.target.value)}
@@ -103,44 +105,54 @@ export function PosForm({
           ref={searchRef}
           value={query}
         />
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-          <button className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${!category ? "bg-brand text-white" : "border bg-surface"}`} onClick={() => setCategory("")} type="button">Todos</button>
-          {categories.map((name) => <button className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${category === name ? "bg-brand text-white" : "border bg-surface"}`} key={name} onClick={() => setCategory(name)} type="button">{name}</button>)}
-          <span className="ml-auto hidden shrink-0 self-center text-xs text-muted sm:block">Presiona / para buscar</span>
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
+            <button className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${!category ? "bg-brand text-white" : "border bg-surface"}`} onClick={() => setCategory("")} type="button">Todos</button>
+            {categories.map((name) => <button className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${category === name ? "bg-brand text-white" : "border bg-surface"}`} key={name} onClick={() => setCategory(name)} type="button">{name}</button>)}
+          </div>
+          <div aria-label="Vista del catálogo" className="flex shrink-0 rounded-xl border bg-surface p-1" role="group">
+            <button aria-label="Ver productos en cuadrícula" aria-pressed={catalogView === "grid"} className={cn("grid size-8 place-items-center rounded-lg text-muted transition", catalogView === "grid" && "bg-accent text-brand-strong")} onClick={() => setCatalogView("grid")} type="button"><Grid2X2 className="size-4" /></button>
+            <button aria-label="Ver productos como lista" aria-pressed={catalogView === "list"} className={cn("grid size-8 place-items-center rounded-lg text-muted transition", catalogView === "list" && "bg-accent text-brand-strong")} onClick={() => setCatalogView("list")} type="button"><List className="size-4" /></button>
+          </div>
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={cn("mt-4 grid gap-3", catalogView === "grid" ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1")}>
           {visible.map((product) => {
             const item = cart.find((entry) => entry.product.id === product.id);
             return (
               <button
-                className="rounded-2xl border bg-surface p-4 text-left transition hover:border-brand"
+                className={cn("min-w-0 rounded-2xl border bg-surface text-left transition hover:border-brand", catalogView === "grid" ? "p-3 sm:p-4" : "flex items-center justify-between gap-4 p-4")}
                 key={product.id}
                 onClick={() => setQuantity(product, (item?.quantity ?? 0) + 1)}
                 type="button"
               >
-                <p className="font-semibold">{product.name}</p>
-                {features.use_stock && (
-                  <p className="mt-1 text-xs text-muted">
-                    {product.stock_quantity} disponibles
-                  </p>
-                )}
-                <p className="mt-4 text-lg font-bold text-brand">
-                  {formatMoney(Number(product.sale_price), currencyConfig.baseCurrency)}
-                </p>
-                <CurrencyEquivalents amount={Number(product.sale_price)} className="mt-1" config={currencyConfig} />
+                <span className="min-w-0">
+                  <span className="block truncate font-semibold">{product.name}</span>
+                  {features.use_stock && <span className="mt-1 block text-xs text-muted">{product.stock_quantity} disponibles</span>}
+                </span>
+                <span className={cn("block", catalogView === "grid" ? "mt-4" : "shrink-0 text-right")}>
+                  <span className="block text-lg font-bold text-brand">{formatMoney(Number(product.sale_price), currencyConfig.baseCurrency)}</span>
+                  <CurrencyEquivalents amount={Number(product.sale_price)} className={cn("mt-1", catalogView === "list" && "justify-end")} config={currencyConfig} />
+                </span>
               </button>
             );
           })}
         </div>
       </section>
 
-      <aside className="h-fit rounded-2xl border bg-surface p-5 xl:sticky xl:top-20">
+      {mobileCartOpen && <button aria-label="Minimizar carrito" className="fixed inset-0 z-20 bg-black/35 backdrop-blur-[1px] xl:hidden" onClick={() => setMobileCartOpen(false)} type="button" />}
+      <aside className={cn("fixed inset-x-3 bottom-[calc(4.5rem_+_env(safe-area-inset-bottom))] z-40 rounded-2xl border bg-surface shadow-2xl transition-[max-height] xl:sticky xl:inset-x-auto xl:bottom-auto xl:top-20 xl:z-auto xl:h-fit xl:max-h-none xl:overflow-visible xl:p-5 xl:shadow-none", mobileCartOpen ? "max-h-[calc(100dvh_-_11rem_-_env(safe-area-inset-bottom))] overflow-y-auto overscroll-contain p-5" : "max-h-16 overflow-hidden p-0")}>
+        <button aria-expanded={mobileCartOpen} className="flex h-16 w-full items-center gap-3 px-4 text-left xl:hidden" onClick={() => setMobileCartOpen(true)} type="button">
+          <span className="relative grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-brand-strong"><ShoppingCart className="size-5" />{cart.length > 0 && <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[0.65rem] font-bold leading-5 text-white">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>}</span>
+          <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{cart.length === 0 ? "Carrito vacío" : "Venta actual"}</span><span className="block truncate text-xs text-muted">{cart.length === 0 ? "Toca para ver el carrito" : `${formatMoney(total, currencyConfig.baseCurrency)} · ${cart.length} ${cart.length === 1 ? "producto" : "productos"}`}</span></span>
+          <span className="flex items-center gap-1 text-xs font-semibold text-brand"><span>Ver</span><ChevronUp className="size-4" /></span>
+        </button>
+        <div className={cn(!mobileCartOpen && "hidden xl:block")}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <ShoppingCart className="size-5 text-brand" />
             <h2 className="font-bold">Venta actual</h2>
           </div>
-          {cart.length > 0 && (
+          <div className="flex items-center gap-1">{cart.length > 0 && (
             <button
               className="min-h-9 rounded-lg px-2 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
               onClick={() => setShowClearDialog(true)}
@@ -148,7 +160,7 @@ export function PosForm({
             >
               Limpiar
             </button>
-          )}
+          )}<button aria-label="Minimizar carrito" className="grid size-9 place-items-center rounded-lg text-muted hover:bg-accent xl:hidden" onClick={() => setMobileCartOpen(false)} type="button"><ChevronDown className="size-5" /></button></div>
         </div>
         <div className="mt-4 space-y-3">
           {cart.length === 0 ? (
@@ -365,6 +377,7 @@ export function PosForm({
         >
           {pending ? "Confirmando..." : "Confirmar venta"}
         </Button>
+        </div>
       </aside>
       {showClearDialog && (
         <div aria-labelledby="clear-cart-title" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/55 p-4 backdrop-blur-sm" role="dialog">
