@@ -4,15 +4,13 @@ import { describe, expect, it, vi } from "vitest";
 import { BarcodeScanner } from "@/features/sales/barcode-scanner";
 
 describe("BarcodeScanner", () => {
-  it("submits codes from a keyboard-wedge reader with Enter", () => {
+  it("opens the compact camera dialog from its scan button", () => {
     const onScan = vi.fn();
     render(<BarcodeScanner feedback={null} onScan={onScan} />);
 
-    const input = screen.getByPlaceholderText("Escanea o escribe el SKU y presiona Enter");
-    fireEvent.change(input, { target: { value: "001234567890" } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.click(screen.getByRole("button", { name: "Escanear código" }));
 
-    expect(onScan).toHaveBeenCalledWith("001234567890");
-    expect((input as HTMLInputElement).value).toBe("");
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Apunta al código de barras" })).toBeTruthy();
   });
 });

@@ -123,14 +123,30 @@ export function PosForm({
   return (
     <form action={action} className="grid gap-6 xl:grid-cols-[1fr_24rem]">
       <section className="pb-20 xl:pb-0">
-        <input
-          className="h-12 w-full rounded-xl border bg-surface px-4"
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Buscar producto por nombre, SKU o código"
-          ref={searchRef}
-          value={query}
-        />
-        {features.enable_barcode_scanner && <BarcodeScanner feedback={barcodeFeedback} onScan={addProductByBarcode} />}
+        <div className="flex items-center gap-2">
+          <input
+            className="h-12 min-w-0 flex-1 rounded-xl border bg-surface px-4"
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && features.enable_barcode_scanner && findProductByBarcode(products, query)) {
+                event.preventDefault();
+                addProductByBarcode(query);
+                setQuery("");
+              }
+            }}
+            placeholder="Buscar producto por nombre, SKU o código"
+            ref={searchRef}
+            value={query}
+          />
+          {features.enable_barcode_scanner && (
+            <BarcodeScanner
+              buttonClassName="border-brand bg-brand text-white hover:bg-brand-strong hover:text-white"
+              buttonLabel="Escanear código de producto"
+              feedback={barcodeFeedback}
+              onScan={addProductByBarcode}
+            />
+          )}
+        </div>
         <div className="mt-3 flex items-center gap-2">
           <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
             <button className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${!category ? "bg-brand text-white" : "border bg-surface"}`} onClick={() => setCategory("")} type="button">Todos</button>
