@@ -26,10 +26,10 @@ export function ProductForm({ categories, enableBarcodeScanner = false, onSucces
       {stayOnList && <input name="stay_on_list" type="hidden" value="true" />}
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="sm:col-span-2"><span className="text-sm font-semibold">Nombre</span><input className="mt-2 h-11 w-full rounded-xl border bg-surface px-3" defaultValue={product?.name} name="name" required /></label>
-        <div>
+        <div className="min-w-0">
           <label className="text-sm font-semibold" htmlFor="product-sku">{enableBarcodeScanner ? "Código de barras / SKU" : "SKU opcional"}</label>
-          <div className="mt-2 flex items-center gap-2">
-            <input autoComplete="off" className="h-11 min-w-0 flex-1 rounded-xl border bg-surface px-3" id="product-sku" inputMode="text" maxLength={80} name="sku" onChange={(event) => setSku(event.target.value)} placeholder={enableBarcodeScanner ? "Escanea o escribe el código" : undefined} value={sku} />
+          <div className="mt-2 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+            <input autoComplete="off" className="h-11 min-w-0 w-full rounded-xl border bg-surface px-3" id="product-sku" inputMode="text" maxLength={80} name="sku" onChange={(event) => setSku(event.target.value)} placeholder={enableBarcodeScanner ? "Escanea o escribe el código" : undefined} value={sku} />
             {enableBarcodeScanner && (
               <BarcodeScanner
                 buttonLabel="Escanear"
