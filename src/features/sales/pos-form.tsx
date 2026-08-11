@@ -141,10 +141,10 @@ export function PosForm({
 
       {mobileCartOpen && <button aria-label="Minimizar carrito" className="fixed inset-0 z-20 bg-black/35 backdrop-blur-[1px] xl:hidden" onClick={() => setMobileCartOpen(false)} type="button" />}
       <aside className={cn("fixed inset-x-3 bottom-[calc(4.5rem_+_env(safe-area-inset-bottom))] z-40 rounded-2xl border bg-surface shadow-2xl transition-[max-height] xl:sticky xl:inset-x-auto xl:bottom-auto xl:top-20 xl:z-auto xl:h-fit xl:max-h-none xl:overflow-visible xl:p-5 xl:shadow-none", mobileCartOpen ? "max-h-[calc(100dvh_-_11rem_-_env(safe-area-inset-bottom))] overflow-y-auto overscroll-contain p-5" : "max-h-16 overflow-hidden p-0")}>
-        <button aria-expanded={mobileCartOpen} className="flex h-16 w-full items-center gap-3 px-4 text-left xl:hidden" onClick={() => setMobileCartOpen(true)} type="button">
+        <button aria-expanded={mobileCartOpen} className="flex h-16 w-full items-center gap-3 px-4 text-left xl:hidden" onClick={() => setMobileCartOpen((open) => !open)} type="button">
           <span className="relative grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-brand-strong"><ShoppingCart className="size-5" />{cart.length > 0 && <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[0.65rem] font-bold leading-5 text-white">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>}</span>
           <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{cart.length === 0 ? "Carrito vacío" : "Venta actual"}</span><span className="block truncate text-xs text-muted">{cart.length === 0 ? "Toca para ver el carrito" : `${formatMoney(total, currencyConfig.baseCurrency)} · ${cart.length} ${cart.length === 1 ? "producto" : "productos"}`}</span></span>
-          <span className="flex items-center gap-1 text-xs font-semibold text-brand"><span>Ver</span><ChevronUp className="size-4" /></span>
+          <span className="flex items-center gap-1 text-xs font-semibold text-brand">{mobileCartOpen ? <><span>Cerrar</span><ChevronDown className="size-4" /></> : <><span>Ver</span><ChevronUp className="size-4" /></>}</span>
         </button>
         <div className={cn(!mobileCartOpen && "hidden xl:block")}>
         <div className="flex items-center justify-between gap-3">
@@ -160,7 +160,7 @@ export function PosForm({
             >
               Limpiar
             </button>
-          )}<button aria-label="Minimizar carrito" className="grid size-9 place-items-center rounded-lg text-muted hover:bg-accent xl:hidden" onClick={() => setMobileCartOpen(false)} type="button"><ChevronDown className="size-5" /></button></div>
+          )}</div>
         </div>
         <div className="mt-4 space-y-3">
           {cart.length === 0 ? (
