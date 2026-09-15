@@ -2,20 +2,36 @@ import "server-only";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import type { ReceiptBusiness, Sale } from "@/features/sales/types";
+import { salesPeriodUtcBounds } from "@/features/reports/period";
 
 async function client() {
   await requireRole("owner");
   return createClient();
 }
 
-export async function getSales(): Promise<Sale[]> {
+export async function getSales(from?: string, to?: string, timeZone?: string): Promise<Sale[]> {
   const supabase = await client();
-  const { data, error } = await supabase
+  let query = supabase
     .from("sales")
     .select("id, sale_number, sold_at, total, total_cost, gross_profit, discount, payment_method_name, status, note, void_reason, voided_at")
     .order("sold_at", { ascending: false });
+  if (from && to && timeZone) {
+    const bounds = salesPeriodUtcBounds(from, to, timeZone);
+    query = query.gte("sold_at", bounds.from).lt("sold_at", bounds.until);
+  }
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return data as Sale[];
+}
+
+export async function getSalesBusinessContext() {
+  const supabase = await client();
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("currency_code, timezone")
+    .single();
+  if (error) throw new Error(error.message);
+  return data as { currency_code: string; timezone: string };
 }
 
 export async function getSale(id: string): Promise<Sale | null> {
