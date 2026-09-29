@@ -7,6 +7,7 @@ import { requireRole } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { refreshAutomaticRates } from "@/features/currency/rate-service";
+import { sendTelegramAlert } from "@/features/currency/telegram-alert";
 
 export type CurrencyActionState = { error?: string; success?: string };
 
@@ -64,6 +65,27 @@ export async function refreshRatesNow(_state: CurrencyActionState): Promise<Curr
   return successes > 0
     ? { success: `${successes} tasa(s) actualizada(s). Revisa el estado de cada fuente.` }
     : { error: results.map((result) => `${result.quote}: ${result.message}`).join(" · ") };
+}
+
+export async function testTelegramRateAlert(_state: CurrencyActionState): Promise<CurrencyActionState> {
+  void _state;
+  await requireRole("super_admin");
+  try {
+    const timestamp = new Intl.DateTimeFormat("es-VE", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "America/Caracas",
+    }).format(new Date());
+    await sendTelegramAlert([
+      "🔔 Monii App — Alerta de prueba",
+      "",
+      "Las notificaciones de tasas están configuradas correctamente.",
+      `Hora: ${timestamp}`,
+    ].join("\n"));
+    return { success: "Alerta de prueba enviada a Telegram." };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "No se pudo enviar la alerta." };
+  }
 }
 
 export async function setGlobalExchangeRate(quote: "VES" | "COP", _state: CurrencyActionState, formData: FormData): Promise<CurrencyActionState> {
