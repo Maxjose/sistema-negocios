@@ -1,11 +1,16 @@
-const CACHE_NAME = "monii-app-v2";
+const CACHE_NAME = "monii-app-v3-brand";
 const OFFLINE_URL = "/offline.html";
 const STATIC_ASSETS = [
   OFFLINE_URL,
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
-  "/icons/icon-maskable-512.png",
-  "/icons/apple-touch-icon.png",
+  "/icons/icon-192.png?v=3",
+  "/icons/icon-512.png?v=3",
+  "/icons/icon-dark-192.png?v=3",
+  "/icons/icon-32.png?v=3",
+  "/icons/icon-dark-32.png?v=3",
+  "/icons/icon-maskable-512.png?v=3",
+  "/icons/icon-monochrome-512.png?v=3",
+  "/icons/apple-touch-icon.png?v=3",
+  "/icons/apple-touch-icon-dark.png?v=3",
 ];
 
 self.addEventListener("install", (event) => {

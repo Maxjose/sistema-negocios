@@ -22,14 +22,20 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/icons/icon-32.png?v=3", sizes: "32x32", type: "image/png", media: "(prefers-color-scheme: light)" },
+      { url: "/icons/icon-dark-32.png?v=3", sizes: "32x32", type: "image/png", media: "(prefers-color-scheme: dark)" },
     ],
     apple: [
       {
-        url: "/icons/apple-touch-icon.png",
+        url: "/icons/apple-touch-icon.png?v=3",
         sizes: "180x180",
         type: "image/png",
+      },
+      {
+        url: "/icons/apple-touch-icon-dark.png?v=3",
+        sizes: "180x180",
+        type: "image/png",
+        media: "(prefers-color-scheme: dark)",
       },
     ],
   },
@@ -40,7 +46,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#176b4d",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#005bf2" },
+    { media: "(prefers-color-scheme: dark)", color: "#202126" },
+  ],
 };
 
 export default function RootLayout({
