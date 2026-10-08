@@ -1,4 +1,7 @@
 export const auditActionLabels: Record<string, string> = {
+  "backup.created": "Respaldo creado",
+  "backup.imported": "Respaldo importado",
+  "backup.restored": "Respaldo restaurado",
   "business.created": "Negocio creado",
   "business.updated": "Negocio actualizado",
   "business.logo_updated": "Logotipo actualizado",

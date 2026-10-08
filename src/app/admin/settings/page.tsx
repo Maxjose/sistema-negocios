@@ -4,6 +4,7 @@ import { MaintenanceForm } from "@/features/admin/maintenance-form";
 import { AdminRatesForm, ManualGlobalRateForm, TelegramAlertTestForm } from "@/features/currency/admin-rates-form";
 import { getGlobalExchangeRates } from "@/features/currency/data";
 import { telegramAlertsConfigured } from "@/features/currency/telegram-alert";
+import { BackupPanel } from "@/features/backups/backup-panel";
 
 export default async function AdminSettingsPage() {
   const [settings, rates] = await Promise.all([getPlatformSettings(), getGlobalExchangeRates()]);
@@ -18,5 +19,6 @@ export default async function AdminSettingsPage() {
     </section>
     <section className="mt-6 rounded-2xl border bg-surface p-6"><div className="flex gap-4"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-brand"><BellRing className="size-5" /></span><div><h3 className="font-bold">Alertas de tasas</h3><p className="mt-2 text-sm leading-6 text-muted">Recibe en Telegram una notificación cuando una tasa falle o vuelva a funcionar. Los errores repetidos idénticos no generan mensajes duplicados.</p></div></div><TelegramAlertTestForm configured={telegramConfigured} /></section>
     <section className="mt-6 rounded-2xl border bg-surface p-6"><div className="flex gap-4"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-brand"><ShieldCheck className="size-5" /></span><div><h3 className="font-bold">Administración protegida</h3><p className="mt-2 text-sm leading-6 text-muted">Solo el superadministrador puede modificar estas opciones globales.</p></div></div></section>
+    <BackupPanel />
   </div>;
 }

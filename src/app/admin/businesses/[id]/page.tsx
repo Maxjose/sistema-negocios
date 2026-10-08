@@ -8,6 +8,7 @@ import { BusinessFeaturesForm } from "@/features/admin/business-features-form";
 import { BusinessPlanForm } from "@/features/admin/business-plan-form";
 import { getBusiness } from "@/features/admin/data";
 import { LogoForm } from "@/features/admin/logo-form";
+import { BackupPanel } from "@/features/backups/backup-panel";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function BusinessDetailPage({
@@ -19,7 +20,7 @@ export default async function BusinessDetailPage({
 }) {
   const { id } = await params;
   const { tab } = await searchParams;
-  const activeTab = tab === "features" || tab === "plan" ? tab : "information";
+  const activeTab = tab === "features" || tab === "plan" || tab === "backups" ? tab : "information";
   const business = await getBusiness(id);
   if (!business) notFound();
 
@@ -51,7 +52,7 @@ export default async function BusinessDetailPage({
         </div>
       </div>
 
-      <nav aria-label="Secciones del negocio" className="mt-7 flex gap-2 border-b">
+      <nav aria-label="Secciones del negocio" className="mt-7 flex gap-2 overflow-x-auto border-b [&>a]:shrink-0">
         <Link
           className={`border-b-2 px-4 py-3 text-sm font-semibold ${
             activeTab === "information"
@@ -75,6 +76,7 @@ export default async function BusinessDetailPage({
         <Link className={`border-b-2 px-4 py-3 text-sm font-semibold ${activeTab === "plan" ? "border-brand text-brand" : "border-transparent text-muted"}`} href={`/admin/businesses/${id}?tab=plan`}>
           Plan
         </Link>
+        <Link className={`border-b-2 px-4 py-3 text-sm font-semibold ${activeTab === "backups" ? "border-brand text-brand" : "border-transparent text-muted"}`} href={`/admin/businesses/${id}?tab=backups`}>Respaldos</Link>
       </nav>
 
       {activeTab === "information" ? (
@@ -100,6 +102,8 @@ export default async function BusinessDetailPage({
           </p>
           <BusinessFeaturesForm business={business} />
         </section>
+      ) : activeTab === "backups" ? (
+        <BackupPanel businessId={id} />
       ) : (
         <section className="mt-6 rounded-2xl border bg-surface p-5 sm:p-7">
           <h3 className="font-bold">Plan del negocio</h3>
