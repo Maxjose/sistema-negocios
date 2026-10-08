@@ -66,7 +66,7 @@ export async function getProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, name, sku, description, image_path, cost_price, sale_price, stock_quantity, low_stock_threshold, is_active, category_id, categories(name), created_at",
+      "id, name, sku, description, image_path, cost_price, sale_price, sale_unit, stock_quantity, low_stock_threshold, is_active, category_id, categories(name), created_at",
     )
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);

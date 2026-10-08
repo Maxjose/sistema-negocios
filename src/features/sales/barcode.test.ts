@@ -12,6 +12,7 @@ const product = {
   cost_price: 1,
   sale_price: 2,
   stock_quantity: 5,
+  sale_unit: "unit",
   low_stock_threshold: 1,
   is_active: true,
   category_id: null,

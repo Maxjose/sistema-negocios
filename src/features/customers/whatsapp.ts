@@ -1,3 +1,5 @@
+import { formatQuantity, type SaleUnit } from "@/features/catalog/measurement";
+
 export function debtWhatsappUrl(input: {
   balance: number;
   currency: string;
@@ -20,7 +22,7 @@ export function invoiceWhatsappUrl(input: {
   currency: string;
   customerName: string;
   date: string;
-  items: Array<{ name: string; quantity: number; subtotal: number }>;
+  items: Array<{ name: string; quantity: number; sale_unit?: SaleUnit; subtotal: number }>;
   paymentMethod: string;
   phone: string;
   saleNumber: number;
@@ -36,7 +38,7 @@ export function invoiceWhatsappUrl(input: {
       maximumFractionDigits: 2,
     }).format(amount);
   const items = input.items
-    .map((item) => `• ${item.quantity} × ${item.name}: ${money(item.subtotal)}`)
+    .map((item) => `• ${formatQuantity(item.quantity, item.sale_unit)} × ${item.name}: ${money(item.subtotal)}`)
     .join("\n");
   const equivalents = input.equivalents?.map((item) => `Equivalente: ${new Intl.NumberFormat("es-VE", { style: "currency", currency: item.currency, maximumFractionDigits: 2 }).format(item.amount)}`) ?? [];
   const message = [

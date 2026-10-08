@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type SaleState = { error?: string };
 const saleSchema = z.object({
-  items: z.array(z.object({ product_id: z.uuid(), quantity: z.number().int().positive() })).min(1).max(100),
+  items: z.array(z.object({ product_id: z.uuid(), quantity: z.number().int().positive().max(2_147_483_647), sale_unit: z.enum(["unit", "weight"]) })).min(1).max(100),
   payments: z.array(z.object({ payment_method_id: z.string(), amount: z.number().min(0) })).min(1).max(5),
   discount: z.number().min(0),
   note: z.string().max(500),
@@ -48,6 +48,7 @@ export async function confirmSale(_state: SaleState, formData: FormData): Promis
     : supabase.rpc("confirm_sale_v3", { p_items: parsed.data.items, p_payments: parsed.data.payments, p_customer_id: parsed.data.customer_id || null, p_discount: parsed.data.discount, p_note: parsed.data.note });
   const { data, error } = await request;
   if (error) {
+    if (error.message.includes("SALE_UNIT_CHANGED")) return { error: "La medida del producto cambió. Recarga los productos antes de vender." };
     if (error.message.includes("INSUFFICIENT_STOCK")) return { error: "La existencia cambió. Revisa las cantidades." };
     if (error.message.includes("DISCOUNTS_DISABLED")) return { error: "Los descuentos están desactivados para este negocio." };
     if (error.message.includes("SALE_NOTES_DISABLED")) return { error: "Las notas están desactivadas para este negocio." };

@@ -36,6 +36,7 @@ export type SalePayment = {
 };
 
 export type SaleItem = {
+  sale_unit: import("@/features/catalog/measurement").SaleUnit;
   id: string;
   product_name: string;
   product_sku: string | null;

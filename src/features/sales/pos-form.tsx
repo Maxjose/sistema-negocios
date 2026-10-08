@@ -3,6 +3,8 @@
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, Grid2X2, List, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 
+import { formatQuantity, lineAmount } from "@/features/catalog/measurement";
+import { WeightDialog } from "@/features/sales/weight-dialog";
 import { Button } from "@/components/ui/button";
 import type {
   BusinessFeatures,
@@ -36,6 +38,7 @@ export function PosForm({
   customers: SaleCustomer[];
   currencyConfig: CurrencyDisplayConfig;
 }) {
+  const [weightProduct, setWeightProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const cartRef = useRef<CartItem[]>([]);
   const [query, setQuery] = useState("");
@@ -65,12 +68,12 @@ export function PosForm({
     () =>
       cart.reduce(
         (sum, item) =>
-          sum + Number(item.product.sale_price) * item.quantity,
+          sum + lineAmount(Number(item.product.sale_price), item.quantity, item.product.sale_unit),
         0,
       ),
     [cart],
   );
-  const total = Math.max(0, subtotal - discount);
+  const total = Math.round(Math.max(0, subtotal - discount) * 100) / 100;
   const paymentTotal = payments.reduce(
     (sum, payment) => sum + payment.amount,
     0,
@@ -95,7 +98,7 @@ export function PosForm({
       setCart((items) => items.filter((item) => item.product.id !== product.id));
       return;
     }
-    if (features.use_stock && quantity > product.stock_quantity) return;
+    if (!Number.isSafeInteger(quantity) || quantity > 2_147_483_647 || (features.use_stock && quantity > product.stock_quantity)) return;
     setCart((items) =>
       items.some((item) => item.product.id === product.id)
         ? items.map((item) =>
@@ -111,6 +114,11 @@ export function PosForm({
       return false;
     }
 
+    if (product.sale_unit === "weight") {
+      setWeightProduct(product);
+      setBarcodeFeedback({ kind: "success", message: `Introduce el peso de ${product.name}.` });
+      return true;
+    }
     const items = cartRef.current;
     const current = items.find((item) => item.product.id === product.id)?.quantity ?? 0;
     if (features.use_stock && current >= product.stock_quantity) {
@@ -173,15 +181,15 @@ export function PosForm({
               <button
                 className={cn("min-w-0 rounded-2xl border bg-surface text-left transition hover:border-brand", catalogView === "grid" ? "p-3 sm:p-4" : "flex items-center justify-between gap-4 p-4")}
                 key={product.id}
-                onClick={() => setQuantity(product, (item?.quantity ?? 0) + 1)}
+                onClick={() => product.sale_unit === "weight" ? setWeightProduct(product) : setQuantity(product, (item?.quantity ?? 0) + 1)}
                 type="button"
               >
                 <span className="min-w-0">
                   <span className="block truncate font-semibold">{product.name}</span>
-                  {features.use_stock && <span className="mt-1 block text-xs text-muted">{product.stock_quantity} disponibles</span>}
+                  {features.use_stock && <span className="mt-1 block text-xs text-muted">{formatQuantity(product.stock_quantity, product.sale_unit)} disponibles</span>}
                 </span>
                 <span className={cn("block", catalogView === "grid" ? "mt-4" : "shrink-0 text-right")}>
-                  <span className="block text-lg font-bold text-brand">{formatMoney(Number(product.sale_price), currencyConfig.baseCurrency)}</span>
+                  <span className="block text-lg font-bold text-brand">{formatMoney(Number(product.sale_price), currencyConfig.baseCurrency)}{product.sale_unit === "weight" ? " / kg" : ""}</span>
                   <CurrencyEquivalents amount={Number(product.sale_price)} className={cn("mt-1", catalogView === "list" && "justify-end")} config={currencyConfig} />
                 </span>
               </button>
@@ -193,7 +201,7 @@ export function PosForm({
       {mobileCartOpen && <button aria-label="Minimizar carrito" className="fixed inset-0 z-20 bg-black/35 backdrop-blur-[1px] xl:hidden" onClick={() => setMobileCartOpen(false)} type="button" />}
       <aside className={cn("fixed inset-x-3 bottom-[calc(4.5rem_+_env(safe-area-inset-bottom))] z-40 rounded-2xl border bg-surface shadow-2xl transition-[max-height] xl:sticky xl:inset-x-auto xl:bottom-auto xl:top-20 xl:z-auto xl:h-fit xl:max-h-none xl:overflow-visible xl:p-5 xl:shadow-none", mobileCartOpen ? "max-h-[calc(100dvh_-_11rem_-_env(safe-area-inset-bottom))] overflow-y-auto overscroll-contain p-5" : "max-h-16 overflow-hidden p-0")}>
         <button aria-expanded={mobileCartOpen} className="flex h-16 w-full items-center gap-3 px-4 text-left xl:hidden" onClick={() => setMobileCartOpen((open) => !open)} type="button">
-          <span className="relative grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-brand-strong"><ShoppingCart className="size-5" />{cart.length > 0 && <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[0.65rem] font-bold leading-5 text-white">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>}</span>
+          <span className="relative grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-brand-strong"><ShoppingCart className="size-5" />{cart.length > 0 && <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[0.65rem] font-bold leading-5 text-white">{cart.length}</span>}</span>
           <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{cart.length === 0 ? "Carrito vacío" : "Venta actual"}</span><span className="block truncate text-xs text-muted">{cart.length === 0 ? "Toca para ver el carrito" : `${formatMoney(total, currencyConfig.baseCurrency)} · ${cart.length} ${cart.length === 1 ? "producto" : "productos"}`}</span></span>
           <span className="flex items-center gap-1 text-xs font-semibold text-brand">{mobileCartOpen ? <><span>Cerrar</span><ChevronDown className="size-4" /></> : <><span>Ver</span><ChevronUp className="size-4" /></>}</span>
         </button>
@@ -232,7 +240,7 @@ export function PosForm({
                   </button>
                 </div>
                 <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  {product.sale_unit === "weight" ? <button className="min-h-9 rounded-lg border px-3 text-sm font-bold" onClick={() => setWeightProduct(product)} type="button">{formatQuantity(quantity, "weight")} · Editar</button> : <div className="flex items-center gap-2">
                     <button
                       className="grid size-8 place-items-center rounded-lg border"
                       onClick={() => setQuantity(product, quantity - 1)}
@@ -250,8 +258,8 @@ export function PosForm({
                     >
                       <Plus className="size-3" />
                     </button>
-                  </div>
-                  <span className="text-right"><span className="block text-sm font-semibold">{formatMoney(Number(product.sale_price) * quantity, currencyConfig.baseCurrency)}</span><CurrencyEquivalents amount={Number(product.sale_price) * quantity} className="justify-end" config={currencyConfig} /></span>
+                  </div>}
+                  <span className="text-right"><span className="block text-sm font-semibold">{formatMoney(lineAmount(Number(product.sale_price), quantity, product.sale_unit), currencyConfig.baseCurrency)}</span><CurrencyEquivalents amount={lineAmount(Number(product.sale_price), quantity, product.sale_unit)} className="justify-end" config={currencyConfig} /></span>
                 </div>
               </div>
             ))
@@ -264,6 +272,7 @@ export function PosForm({
             cart.map((item) => ({
               product_id: item.product.id,
               quantity: item.quantity,
+              sale_unit: item.product.sale_unit,
             })),
           )}
         />
@@ -431,6 +440,7 @@ export function PosForm({
         </Button>
         </div>
       </aside>
+      {weightProduct && <WeightDialog config={currencyConfig} current={cart.find((item) => item.product.id === weightProduct.id)?.quantity ?? 0} onClose={() => setWeightProduct(null)} onConfirm={(grams) => { setQuantity(weightProduct, grams); setWeightProduct(null); void playBarcodeSuccessSound(); }} product={weightProduct} useStock={features.use_stock} />}
       {showClearDialog && (
         <div aria-labelledby="clear-cart-title" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/55 p-4 backdrop-blur-sm" role="dialog">
           <div className="w-full max-w-sm rounded-3xl border bg-surface p-6 shadow-2xl">

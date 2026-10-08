@@ -8,6 +8,7 @@ import { requireRole } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { AccentTheme } from "@/features/catalog/types";
+import { quantityFromInput } from "@/features/catalog/measurement";
 
 export type CatalogState = { error?: string; success?: string };
 const accentSchema = z.enum(["default", "emerald", "blue", "violet", "rose", "amber", "cyan"]);
@@ -197,6 +198,7 @@ export async function reorderSettings(kind: "categories" | "payment_methods", or
 }
 
 const productSchema = z.object({
+  sale_unit: z.enum(["unit", "weight"]).default("unit"),
   name: z.string().trim().min(1).max(160),
   sku: z.string().trim().max(80).optional(),
   description: z.string().trim().max(1000).optional(),
@@ -209,15 +211,25 @@ const productSchema = z.object({
 });
 
 function productInput(formData: FormData) {
+  const saleUnit = formData.get("sale_unit") === "weight" ? "weight" : "unit";
+  let stock: number;
+  let threshold: number;
+  try {
+    stock = quantityFromInput(Number(formData.get("stock_quantity")), saleUnit);
+    threshold = quantityFromInput(Number(formData.get("low_stock_threshold")), saleUnit);
+  } catch {
+    return productSchema.safeParse({});
+  }
   return productSchema.safeParse({
+    sale_unit: saleUnit,
     name: formData.get("name"),
     sku: formData.get("sku"),
     description: formData.get("description"),
     category_id: formData.get("category_id"),
     cost_price: formData.get("cost_price"),
     sale_price: formData.get("sale_price"),
-    stock_quantity: formData.get("stock_quantity"),
-    low_stock_threshold: formData.get("low_stock_threshold"),
+    stock_quantity: stock,
+    low_stock_threshold: threshold,
     is_active: formData.get("is_active"),
   });
 }
@@ -248,6 +260,7 @@ export async function updateProduct(
   if (!parsed.success) return { error: "Revisa precios, cantidades y campos obligatorios." };
   const { data: before } = await supabase.from("products").select().eq("id", id).single();
   if (!before) return { error: "El producto no existe." };
+  if (before.sale_unit !== parsed.data.sale_unit) return { error: "El tipo de venta no se puede cambiar después de crear el producto. Crea otro producto para usar una medida diferente." };
   const { data: business } = await supabase.from("businesses").select("enable_stock_adjustments").eq("id", businessId).single();
   const payload = { ...parsed.data, stock_quantity: business?.enable_stock_adjustments ? before.stock_quantity : parsed.data.stock_quantity, category_id: parsed.data.category_id || null, sku: parsed.data.sku || null, description: parsed.data.description || null };
   const { error } = await supabase.from("products").update(payload).eq("id", id);
@@ -264,9 +277,14 @@ const adjustmentSchema = z.object({
 });
 
 export async function adjustProductStock(id: string, _state: CatalogState, formData: FormData): Promise<CatalogState> {
-  const parsed = adjustmentSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { error: "Indica la nueva cantidad y un motivo." };
   const { supabase } = await context();
+  const { data: product } = await supabase.from("products").select("sale_unit").eq("id", id).single();
+  if (!product) return { error: "El producto no existe." };
+  let quantity: number;
+  try { quantity = quantityFromInput(Number(formData.get("new_quantity")), product.sale_unit); }
+  catch (error) { return { error: error instanceof Error ? error.message : "Cantidad inválida." }; }
+  const parsed = adjustmentSchema.safeParse({ new_quantity: quantity, reason: formData.get("reason") });
+  if (!parsed.success) return { error: "Indica la nueva cantidad y un motivo." };
   const { error } = await supabase.rpc("adjust_product_stock", {
     p_product_id: id,
     p_new_quantity: parsed.data.new_quantity,
@@ -331,11 +349,20 @@ export async function importProducts(_state: CatalogState, formData: FormData): 
   for (let index = 1; index < lines.length; index += 1) {
     const values = parseCsvLine(lines[index]);
     const row = Object.fromEntries(headers.map((header, position) => [header, values[position] ?? ""]));
+    const saleUnit = row.tipo_venta === "peso" || row.tipo_venta === "weight" ? "weight" : "unit";
+    if (row.tipo_venta && !["peso", "weight", "unidad", "unit"].includes(row.tipo_venta)) return { error: `Tipo de venta inválido en la fila ${index + 1}. Usa unidad o peso.` };
+    let stock: number;
+    let threshold: number;
+    try {
+      stock = quantityFromInput(Number(row.existencia || 0), saleUnit);
+      threshold = quantityFromInput(Number(row.minimo || 0), saleUnit);
+    } catch { return { error: `Peso o cantidad inválido en la fila ${index + 1}.` }; }
     const parsed = productSchema.safeParse({
+      sale_unit: saleUnit,
       name: row.nombre, sku: row.sku, description: row.descripcion,
       category_id: row.categoria ? categoryMap.get(row.categoria.toLowerCase()) ?? "" : "",
       cost_price: row.precio_costo, sale_price: row.precio_venta,
-      stock_quantity: row.existencia || 0, low_stock_threshold: row.minimo || 0,
+      stock_quantity: stock, low_stock_threshold: threshold,
       is_active: "true",
     });
     if (!parsed.success) return { error: `La fila ${index + 1} contiene datos inválidos.` };

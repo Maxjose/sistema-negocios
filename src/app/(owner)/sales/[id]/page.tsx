@@ -1,3 +1,4 @@
+import { formatQuantity } from "@/features/catalog/measurement";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, MessageCircle } from "lucide-react";
@@ -39,6 +40,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
         items: (sale.sale_items ?? []).map((item) => ({
           name: item.product_name,
           quantity: item.quantity,
+          sale_unit: item.sale_unit,
           subtotal: Number(item.subtotal),
         })),
         paymentMethod: sale.payment_method_name,
@@ -106,8 +108,8 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
               {sale.sale_items?.map((item) => (
                 <tr key={item.id}>
                   <td className="py-3 pr-2 font-semibold">{item.product_name}{item.product_sku && <span className="block text-xs font-normal text-muted">SKU: {item.product_sku}</span>}</td>
-                  <td className="py-3 text-center">{item.quantity}</td>
-                  <td className="py-3 text-right">{money(Number(item.unit_price))}</td>
+                  <td className="py-3 text-center">{formatQuantity(item.quantity, item.sale_unit)}</td>
+                  <td className="py-3 text-right">{money(Number(item.unit_price))}{item.sale_unit === "weight" ? " / kg" : ""}</td>
                   <td className="py-3 text-right font-semibold">{money(Number(item.subtotal))}</td>
                 </tr>
               ))}

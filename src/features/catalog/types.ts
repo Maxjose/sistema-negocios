@@ -27,6 +27,7 @@ export type BusinessFeatures = {
 export type AccentTheme = "default" | "emerald" | "blue" | "violet" | "rose" | "amber" | "cyan";
 
 export type Product = {
+  sale_unit: import("./measurement").SaleUnit;
   id: string;
   name: string;
   sku: string | null;
